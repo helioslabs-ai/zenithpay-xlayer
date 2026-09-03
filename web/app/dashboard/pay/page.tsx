@@ -1,10 +1,23 @@
 "use client";
 
-import { ExternalLink, FlaskConical, Loader2 } from "lucide-react";
+import {
+  AlertTriangle,
+  ExternalLink,
+  FlaskConical,
+  Loader2,
+} from "lucide-react";
 import { useState } from "react";
 import { useAgent } from "@/components/dashboard/agent-context";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -119,10 +132,16 @@ export default function PayPage() {
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<PaymentResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [riskDialogOpen, setRiskDialogOpen] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setRiskDialogOpen(true);
+  }
+
+  async function confirmPayment() {
     setSubmitting(true);
+    setRiskDialogOpen(false);
     setResult(null);
     setError(null);
 
@@ -151,6 +170,15 @@ export default function PayPage() {
         <p className="text-sm text-muted-foreground">
           Trigger a test payment to see the full policy enforcement flow live.
           In production, your agent executes this automatically via the skill.
+        </p>
+      </div>
+
+      <div className="border border-amber-500/40 bg-amber-500/10 p-4 text-sm text-amber-800 dark:text-amber-300">
+        <p className="font-medium">Portfolio demo — do not use real funds</p>
+        <p className="mt-1 text-xs leading-5 text-amber-800/80 dark:text-amber-300/80">
+          This project is experimental. Do not deposit assets or connect a wallet
+          you care about. Smart-contract, API, and transaction failures can
+          cause permanent loss.
         </p>
       </div>
 
@@ -270,6 +298,40 @@ export default function PayPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={riskDialogOpen} onOpenChange={setRiskDialogOpen}>
+        <DialogContent className="rounded-none border-amber-500/50">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-sm uppercase tracking-wider">
+              <AlertTriangle className="size-4 text-amber-500" />
+              Experimental payment flow
+            </DialogTitle>
+            <DialogDescription className="pt-2 leading-6">
+              This is a portfolio demonstration of policy-gated x402 payments.
+              Do not deposit funds or connect a wallet you care about. Any
+              transaction may be irreversible, and this software comes with no
+              guarantee of safety or recovery.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-none"
+              onClick={() => setRiskDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              className="rounded-none"
+              onClick={confirmPayment}
+            >
+              I understand — continue
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
