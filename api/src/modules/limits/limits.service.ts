@@ -1,6 +1,6 @@
 import { and, sql } from "drizzle-orm";
 import { createPublicClient, http, recoverMessageAddress } from "viem";
-import { xlayer } from "../../config/chains";
+import { base } from "../../config/chains";
 import { SPEND_POLICY_ABI, SPEND_POLICY_ADDRESS } from "../../config/contracts";
 import { getDb } from "../../db/client";
 import { agents } from "../../db/schema/agents";
@@ -16,7 +16,7 @@ import type {
 } from "./limits.types";
 
 const viemClient = createPublicClient({
-  chain: xlayer,
+  chain: base,
   transport: http(),
 });
 

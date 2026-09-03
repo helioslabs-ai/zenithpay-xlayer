@@ -14,7 +14,7 @@ export const ledger = pgTable("ledger", {
     .references(() => agents.address),
   merchant: text("merchant").notNull(),
   amount: text("amount").notNull(),
-  currency: text("currency").default("USDG").notNull(),
+  currency: text("currency").default("USDC").notNull(),
   intent: text("intent").notNull(),
   status: text("status").notNull(),
   reason: text("reason"),

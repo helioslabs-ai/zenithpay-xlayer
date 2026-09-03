@@ -162,6 +162,9 @@ async function walletGet<T>(
 }
 
 export async function akLogin(): Promise<WalletSession> {
+  if (!env.OKX_API_KEY || !env.OKX_SECRET_KEY || !env.OKX_PASSPHRASE) {
+    throw new Error("Legacy OKX wallet provider is not configured");
+  }
   if (cachedSession && Date.now() / 1000 < cachedSession.expiresAt - 60) {
     return cachedSession;
   }

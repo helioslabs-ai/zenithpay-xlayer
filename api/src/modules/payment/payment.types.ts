@@ -11,7 +11,7 @@ export interface PaymentApproved {
   status: "approved";
   txHash: string;
   amount: string;
-  currency: string;
+  currency: "USDC" | string;
   merchant: string;
   intent: string;
   swapUsed: boolean;
