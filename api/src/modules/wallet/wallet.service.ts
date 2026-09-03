@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import { and, eq, sql } from "drizzle-orm";
 import { getDb } from "../../db/client";
 import { agents } from "../../db/schema/agents";
-import * as agenticWallet from "../../providers/onchainos/agentic-wallet";
+import { getPrivyClient } from "../../providers/privy/client";
 import type { GenesisWalletRequest, GenesisWalletResult } from "./wallet.types";
 
 const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
@@ -17,49 +17,40 @@ export async function createGenesisWallet(
 ): Promise<GenesisWalletResult> {
   const db = getDb();
 
-  const session = await agenticWallet.akLogin();
-
-  const xlayerAddr = session.addressList.find((a) => a.chainIndex === "196");
-  const resolvedAddress = xlayerAddr?.address ?? session.addressList[0]?.address;
-  const agentAddress = resolvedAddress?.toLowerCase();
-
-  if (!agentAddress) {
-    throw new Error("No wallet address available from OKX Agentic Wallet");
-  }
-
-  const existing = await db
+  const [ownedAgent] = await db
     .select()
     .from(agents)
-    .where(eq(agents.address, agentAddress));
+    .where(sql`lower(${agents.ownerEoa}) = ${ownerEoa.toLowerCase()}`);
 
-  if (existing.length > 0) {
-    // Return existing API key — idempotent genesis
-    const apiKey = existing[0].apiKey ?? generateApiKey();
-    if (!existing[0].apiKey) {
-      await db
-        .update(agents)
-        .set({ apiKey, label: request.label ?? existing[0].label })
-        .where(eq(agents.address, agentAddress));
-    } else if (request.label && request.label !== existing[0].label) {
-      await db
-        .update(agents)
-        .set({ label: request.label })
-        .where(eq(agents.address, agentAddress));
+  if (ownedAgent) {
+    if (!ownedAgent.privyWalletId) {
+      throw new Error(
+        "Agent belongs to the legacy OKX wallet system and must be recreated on Base",
+      );
     }
     return {
-      agentAddress,
-      apiKey,
-      label: request.label ?? existing[0].label,
-      createdAt:
-        existing[0].createdAt?.toISOString() ?? new Date().toISOString(),
-      message: `Wallet created. Activate at https://usezenithpay.xyz/onboarding?agent=${agentAddress}`,
+      agentAddress: ownedAgent.address,
+      network: "base",
+      walletProvider: "privy",
+      apiKey: ownedAgent.apiKey ?? "",
+      label: ownedAgent.label,
+      createdAt: ownedAgent.createdAt.toISOString(),
+      message: `Wallet already exists. Activate at https://usezenithpay.xyz/onboarding?agent=${ownedAgent.address}`,
     };
   }
+
+  const privy = getPrivyClient();
+  const wallet = await privy.wallets().create({
+    chain_type: "ethereum",
+    display_name: request.label ?? "ZenithPay agent",
+  });
+  const agentAddress = wallet.address.toLowerCase();
 
   const apiKey = generateApiKey();
 
   await db.insert(agents).values({
     address: agentAddress,
+    privyWalletId: wallet.id,
     apiKey,
     label: request.label ?? null,
     ownerEoa: ownerEoa.toLowerCase(),
@@ -68,11 +59,27 @@ export async function createGenesisWallet(
 
   return {
     agentAddress,
+    network: "base",
+    walletProvider: "privy",
     apiKey,
     label: request.label ?? null,
     createdAt: new Date().toISOString(),
     message: `Wallet created. Activate at https://usezenithpay.xyz/onboarding?agent=${agentAddress}`,
   };
+}
+
+export async function getPrivyWalletId(agentAddress: string): Promise<string> {
+  const db = getDb();
+  const [agent] = await db
+    .select({ privyWalletId: agents.privyWalletId })
+    .from(agents)
+    .where(sql`lower(${agents.address}) = ${agentAddress.toLowerCase()}`);
+
+  if (!agent?.privyWalletId) {
+    throw new Error("Agent is not backed by a Privy wallet on Base");
+  }
+
+  return agent.privyWalletId;
 }
 
 export async function getAgentsByOwner(ownerEoa: string) {

@@ -19,6 +19,9 @@ function buildHeaders(
   path: string,
   body: string,
 ): Record<string, string> {
+  if (!env.OKX_API_KEY || !env.OKX_SECRET_KEY || !env.OKX_PASSPHRASE) {
+    throw new Error("Legacy OKX provider is not configured");
+  }
   const timestamp = new Date().toISOString();
   const sign = generateSignature(timestamp, method, path, body);
 

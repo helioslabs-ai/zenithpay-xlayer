@@ -24,6 +24,15 @@ function DemoBanner() {
   );
 }
 
+function RiskBanner() {
+  return (
+    <div className="w-full border-b border-red-500/30 bg-red-500/10 px-4 py-2 text-center text-xs text-red-700 dark:text-red-300">
+      Experimental portfolio demo. Do not deposit funds or connect a wallet you
+      care about. Transactions may be irreversible.
+    </div>
+  );
+}
+
 function DashboardShell({
   children,
   isDemo,
@@ -38,6 +47,7 @@ function DashboardShell({
       <NoAgentDialog hasAgent={hasAgent} loading={loading} />
       <AppSidebar />
       <SidebarInset>
+        <RiskBanner />
         {isDemo && <DemoBanner />}
         <main className="flex flex-col flex-1 p-6 min-w-0">{children}</main>
       </SidebarInset>

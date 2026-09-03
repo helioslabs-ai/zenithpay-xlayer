@@ -1,11 +1,17 @@
 import { createPublicClient, http } from "viem";
 import {
+  BASE_CHAIN_ID,
+  BASE_USDC,
+  BASE_X402_NETWORK,
+  base,
   OKB_NATIVE,
   XLAYER_CHAIN_ID,
   XLAYER_USDC,
   xlayer,
 } from "../../config/chains";
 import { SPEND_POLICY_ABI, SPEND_POLICY_ADDRESS } from "../../config/contracts";
+import { getPrivyWalletId } from "../wallet/wallet.service";
+import { payX402 } from "../../providers/privy/x402";
 import * as balanceProvider from "../../providers/onchainos/balance";
 import * as paymentsProvider from "../../providers/onchainos/payments";
 import * as swapProvider from "../../providers/onchainos/swap";
@@ -14,11 +20,27 @@ import * as approvalsService from "../approvals/approvals.service";
 import * as ledgerService from "../ledger/ledger.service";
 import { getLimits } from "../limits/limits.service";
 import type { PaymentRequest, PaymentResult } from "./payment.types";
+import type { BlockReason } from "../../types";
 
 const viemClient = createPublicClient({
   chain: xlayer,
   transport: http(),
 });
+
+const baseClient = createPublicClient({
+  chain: base,
+  transport: http(),
+});
+
+const erc20BalanceAbi = [
+  {
+    type: "function",
+    name: "balanceOf",
+    inputs: [{ name: "account", type: "address" }],
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
+  },
+] as const;
 
 /**
  * Core payment execution — follows the non-negotiable 6-step flow:
@@ -30,6 +52,141 @@ const viemClient = createPublicClient({
  * 6. Return response
  */
 export async function executePayment(
+  request: PaymentRequest,
+): Promise<PaymentResult> {
+  return executeBasePayment(request);
+}
+
+async function executeBasePayment(
+  request: PaymentRequest,
+): Promise<PaymentResult> {
+  const { agentAddress, serviceUrl, maxAmount, intent } = request;
+  const merchant = extractHost(serviceUrl);
+  const amountUnits = usdcToUnits(maxAmount);
+  const policy = await getLimits(agentAddress);
+  const zeroAddress =
+    "0x0000000000000000000000000000000000000000" as `0x${string}`;
+
+  const blocked = async (
+    reason: BlockReason,
+    message?: string,
+  ): Promise<PaymentResult> => {
+    await ledgerService.writeTransaction({
+      agentAddress,
+      merchant,
+      amount: maxAmount,
+      currency: "USDC",
+      intent,
+      status: "blocked",
+      reason,
+      swapUsed: false,
+      network: BASE_X402_NETWORK,
+      asset: BASE_USDC,
+      chainId: BASE_CHAIN_ID,
+    });
+    return {
+      status: "blocked",
+      reason,
+      amount: maxAmount,
+      merchant,
+      onchainEvent: "PaymentBlocked",
+      ...(message ? { message } : {}),
+    };
+  };
+
+  try {
+    const [allowed, reason] = (await baseClient.readContract({
+      address: SPEND_POLICY_ADDRESS,
+      abi: SPEND_POLICY_ABI,
+      functionName: "checkPayment",
+      args: [agentAddress as `0x${string}`, zeroAddress, amountUnits],
+    })) as [boolean, string];
+    if (!allowed) return blocked(mapOnchainReason(reason));
+  } catch (error) {
+    return blocked(
+      "policy_check_failed",
+      error instanceof Error ? error.message : "Base policy check failed",
+    );
+  }
+
+  if (policy.approvalThreshold && amountUnits > usdcToUnits(policy.approvalThreshold)) {
+    const approval = await approvalsService.createPendingApproval({
+      agentAddress,
+      merchant,
+      serviceUrl,
+      amount: maxAmount,
+      intent,
+    });
+    return {
+      status: "pending",
+      approvalId: approval.id,
+      amount: maxAmount,
+      merchant,
+      intent,
+      message: "Payment exceeds approval threshold. Awaiting human review at GET /approvals.",
+    };
+  }
+
+  try {
+    const balance = await baseClient.readContract({
+      address: BASE_USDC,
+      abi: erc20BalanceAbi,
+      functionName: "balanceOf",
+      args: [agentAddress as `0x${string}`],
+    });
+    if (balance < amountUnits) return blocked("insufficient_balance");
+  } catch (error) {
+    return blocked(
+      "payment_failed",
+      error instanceof Error ? error.message : "Base balance check failed",
+    );
+  }
+
+  try {
+    const walletId = await getPrivyWalletId(agentAddress);
+    const settled = await payX402(
+      serviceUrl,
+      walletId,
+      agentAddress as `0x${string}`,
+      maxAmount,
+    );
+    await ledgerService.writeTransaction({
+      agentAddress,
+      merchant,
+      amount: maxAmount,
+      currency: "USDC",
+      intent,
+      status: "approved",
+      txHash: settled.txHash,
+      swapUsed: false,
+      network: settled.network,
+      asset: settled.asset,
+      chainId: BASE_CHAIN_ID,
+    });
+    return {
+      status: "approved",
+      txHash: settled.txHash,
+      amount: maxAmount,
+      currency: "USDC",
+      merchant,
+      intent,
+      swapUsed: false,
+      okbSpent: null,
+      remainingDailyBudget: "0",
+      settledAt: new Date().toISOString(),
+      network: settled.network,
+      asset: settled.asset,
+      chainId: BASE_CHAIN_ID,
+    };
+  } catch (error) {
+    return blocked(
+      "payment_failed",
+      error instanceof Error ? error.message : "Privy x402 payment failed",
+    );
+  }
+}
+
+async function executeLegacyXLayerPayment(
   request: PaymentRequest,
 ): Promise<PaymentResult> {
   const { agentAddress, serviceUrl, maxAmount, intent } = request;

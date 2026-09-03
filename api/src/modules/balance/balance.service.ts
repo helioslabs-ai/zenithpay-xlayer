@@ -1,17 +1,26 @@
 import { eq } from "drizzle-orm";
-import { createPublicClient, http } from "viem";
-import { OKB_NATIVE, XLAYER_USDC, xlayer } from "../../config/chains";
+import { createPublicClient, formatUnits, http } from "viem";
+import { BASE_USDC, base } from "../../config/chains";
 import { SPEND_POLICY_ABI, SPEND_POLICY_ADDRESS } from "../../config/contracts";
 import { getDb } from "../../db/client";
 import { agents } from "../../db/schema/agents";
-import * as balanceProvider from "../../providers/onchainos/balance";
 import { unitsToUsdc } from "../../utils";
 import type { AgentBalance } from "./balance.types";
 
 const viemClient = createPublicClient({
-  chain: xlayer,
+  chain: base,
   transport: http(),
 });
+
+const erc20BalanceAbi = [
+  {
+    type: "function",
+    name: "balanceOf",
+    inputs: [{ name: "account", type: "address" }],
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
+  },
+] as const;
 
 export async function getBalance(agentAddress: string): Promise<AgentBalance> {
   const db = getDb();
@@ -20,26 +29,15 @@ export async function getBalance(agentAddress: string): Promise<AgentBalance> {
     .from(agents)
     .where(eq(agents.address, agentAddress));
 
-  const tokenBalances = await balanceProvider.getTokenBalances(agentAddress, [
-    XLAYER_USDC,
-    OKB_NATIVE,
-  ]);
-
-  let usdcBalance = "0";
-  let okbBalance = "0";
-  for (const tb of tokenBalances) {
-    const addr = (tb.tokenContractAddress ?? "").toLowerCase();
-    if (addr === XLAYER_USDC.toLowerCase()) {
-      usdcBalance = tb.balance;
-    }
-    if (
-      addr === "" ||
-      addr === OKB_NATIVE.toLowerCase() ||
-      tb.symbol === "OKB"
-    ) {
-      okbBalance = tb.balance;
-    }
-  }
+  const usdcBalance = formatUnits(
+    await viemClient.readContract({
+      address: BASE_USDC,
+      abi: erc20BalanceAbi,
+      functionName: "balanceOf",
+      args: [agentAddress as `0x${string}`],
+    }),
+    6,
+  );
 
   let remainingDailyBudget = "0";
   try {
@@ -57,7 +55,7 @@ export async function getBalance(agentAddress: string): Promise<AgentBalance> {
   return {
     address: agentAddress,
     label: agent?.label ?? null,
-    balances: { USDG: usdcBalance, OKB: okbBalance },
+    balances: { USDG: usdcBalance, OKB: "0" },
     remainingDailyBudget,
   };
 }

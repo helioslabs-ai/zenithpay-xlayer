@@ -6,13 +6,23 @@ const envSchema = z.object({
     .enum(["development", "production", "test"])
     .default("development"),
 
-  // X Layer RPC
+  // Base mainnet is the default execution network. X Layer remains optional
+  // for the legacy adapter during migration.
+  BASE_RPC_URL: z.string().url().default("https://mainnet.base.org"),
+  X402_FACILITATOR_URL: z.string().url().optional(),
+
+  // Privy server wallet integration
+  PRIVY_APP_ID: z.string().min(1).optional(),
+  PRIVY_APP_SECRET: z.string().min(1).optional(),
+  PRIVY_AUTHORIZATION_PRIVATE_KEY: z.string().min(1).optional(),
+
+  // Legacy X Layer RPC
   XLAYER_RPC_URL: z.string().url().default("https://rpc.xlayer.tech"),
 
   // OKX OnchainOS
-  OKX_API_KEY: z.string().min(1),
-  OKX_SECRET_KEY: z.string().min(1),
-  OKX_PASSPHRASE: z.string().min(1),
+  OKX_API_KEY: z.string().min(1).optional(),
+  OKX_SECRET_KEY: z.string().min(1).optional(),
+  OKX_PASSPHRASE: z.string().min(1).optional(),
   OKX_PROJECT_ID: z.string().optional(),
 
   // Contract — must be set to deployed address

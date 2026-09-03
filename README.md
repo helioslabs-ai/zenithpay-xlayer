@@ -12,6 +12,13 @@
 
 **The spend governance layer for AI agents — with onchain-enforced policies, gasless x402 payment settlements in USDG, and a full audit trail. Live on X Layer and powered by OKX OnchainOS.**
 
+> **Safety notice:** This repository is an experimental portfolio and hackathon
+> project, not a production payment product. Do not deposit funds or connect a
+> wallet you care about. Smart contracts, APIs, third-party services, and
+> transaction execution can fail and may cause permanent asset loss. Use only
+> funds you can afford to lose. This notice is not legal or financial advice
+> and does not remove any legal obligations.
+
 <br/>
 
 [![Network](<https://img.shields.io/badge/Network-X%20Layer%20(196)-19191A?style=flat-square&logoColor=white>)](https://www.okx.com/xlayer)
