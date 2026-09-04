@@ -10,22 +10,10 @@
 
 **The spend governance layer for AI agents — with onchain-enforced policies, x402 payment settlements in USDC, and a full audit trail. Live on Base.**
 
-> **Safety notice:** This is an experimental project for demonstration purposes.
-> Do not deposit funds you cannot afford to lose. Smart contracts, APIs,
-> third-party services, and transaction execution can fail and may cause
-> permanent asset loss. This notice is not legal or financial advice and does
-> not remove any legal obligations.
-
-<br/>
-
 [![Network](<https://img.shields.io/badge/Network-Base%20(8453)-0052FF?style=flat-square&logoColor=white>)](https://base.org)
 [![Payments](https://img.shields.io/badge/Protocol-x402-FF69B4?style=flat-square&logoColor=white)](https://www.x402.org)
 [![USDC Settlement](https://img.shields.io/badge/Settlement-USDC-2775CA?style=flat-square&logoColor=white)](https://www.circle.com/usdc)
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](./LICENSE)
-
-<br/>
-
-[**Live Demo**](https://usezenithpay.xyz) · [**Video Demo**](https://youtu.be/fwr1vvNi7QA) · [**Docs**](https://docs.usezenithpay.xyz) · [**Agent Skill**](https://api.usezenithpay.xyz/skill.md)
 
 </div>
 
@@ -469,6 +457,12 @@ zenithpay-buildx/
 ## Contributing
 
 PRs welcome. Open an issue first for significant changes.
+
+---
+
+## Disclaimer
+
+This is an experimental project. Do not deposit funds you cannot afford to lose. Smart contracts, APIs, third-party services, and transaction execution can fail and may cause permanent asset loss.
 
 ---
 
