@@ -8,7 +8,7 @@ ZenithPay's MCP server is the primary runtime integration. Once connected, the 6
 ## MCP server URL
 
 ```
-https://api.usezenithpay.xyz/mcp
+https://zp-api-q4hd.onrender.com/mcp
 ```
 
 ## Prerequisites
@@ -29,7 +29,7 @@ ZENITHPAY_API_KEY=$(cat ~/.zenithpay/config.json | grep apiKey | cut -d'"' -f4)
 claude mcp add --transport http --scope user \
   --header "Authorization: Bearer $ZENITHPAY_API_KEY" \
   --header "X-Agent-Address: $AGENT_ADDRESS" \
-  zenithpay https://api.usezenithpay.xyz/mcp
+  zenithpay https://zp-api-q4hd.onrender.com/mcp
 ```
 
 Restart Claude Code. The `zenithpay_*` tools appear in your tool list immediately.
@@ -43,7 +43,7 @@ Add to `.cursor/mcp.json` (project) or `~/.cursor/mcp.json` (global):
   "mcpServers": {
     "zenithpay": {
       "type": "http",
-      "url": "https://api.usezenithpay.xyz/mcp",
+      "url": "https://zp-api-q4hd.onrender.com/mcp",
       "headers": {
         "Authorization": "Bearer <your-api-key>",
         "X-Agent-Address": "<your-agent-address>"
@@ -62,7 +62,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
   "mcpServers": {
     "zenithpay": {
       "type": "http",
-      "url": "https://api.usezenithpay.xyz/mcp",
+      "url": "https://zp-api-q4hd.onrender.com/mcp",
       "headers": {
         "Authorization": "Bearer <your-api-key>",
         "X-Agent-Address": "<your-agent-address>"
@@ -80,7 +80,7 @@ Add to `~/.gemini/settings.json`:
 {
   "mcpServers": {
     "zenithpay": {
-      "httpUrl": "https://api.usezenithpay.xyz/mcp",
+      "httpUrl": "https://zp-api-q4hd.onrender.com/mcp",
       "headers": {
         "Authorization": "Bearer <your-api-key>",
         "X-Agent-Address": "<your-agent-address>"
@@ -96,7 +96,7 @@ Add to `~/.gemini/settings.json`:
 from agents.mcp import MCPServerHTTP
 
 zenithpay = MCPServerHTTP(
-    url="https://api.usezenithpay.xyz/mcp",
+    url="https://zp-api-q4hd.onrender.com/mcp",
     headers={
         "Authorization": "Bearer <your-api-key>",
         "X-Agent-Address": "<your-agent-address>"

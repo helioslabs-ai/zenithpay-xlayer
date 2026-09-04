@@ -127,7 +127,7 @@ zenithpay-buildx/
 │   ├── script/Deploy.s.sol
 │   └── broadcast/
 │
-├── skills/                 # Agent skill — served at api.usezenithpay.xyz/skill.md
+├── skills/                 # Agent skill — served at zp-api-q4hd.onrender.com/skill.md
 │   └── spend-agent/
 │       ├── SKILL.md
 │       └── references/api_docs.md
@@ -310,12 +310,12 @@ All provider calls go through `providers/privy/`. Never call Privy or Base RPCs 
 | Package      | Host            | URL                                            |
 | ------------ | --------------- | ---------------------------------------------- |
 | `web/`       | Vercel          | `usezenithpay.xyz`                             |
-| `api/`       | Railway         | `api.usezenithpay.xyz`                         |
+| `api/`       | Railway         | `zp-api-q4hd.onrender.com`                         |
 | `docs/`      | Vercel          | `docs.usezenithpay.xyz` (post-deadline)        |
 | `contracts/` | Base mainnet    | Already deployed — keep `broadcast/` committed |
 
-`api.usezenithpay.xyz/mcp` — MCP server (same Railway process)
-`api.usezenithpay.xyz/skill.md` — Agent skill file (same Railway process)
+`zp-api-q4hd.onrender.com/mcp` — MCP server (same Railway process)
+`zp-api-q4hd.onrender.com/skill.md` — Agent skill file (same Railway process)
 
 DNS: add `api` CNAME at domain registrar pointing to Railway deployment URL.
 

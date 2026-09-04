@@ -61,20 +61,20 @@ ZenithPay gives all three with onchain policy enforcement first, then payment ex
 
 ## Current production references
 
-- API: `https://api.usezenithpay.xyz`
-- Seller route: `https://api.usezenithpay.xyz/sell/agent-intel`
+- API: `https://zp-api-q4hd.onrender.com`
+- Seller route: `https://zp-api-q4hd.onrender.com/sell/agent-intel`
 - Chain: Base mainnet (8453)
 - USDC: `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`
 
 ## Minimal pay example
 
 ```bash
-curl -X POST https://api.usezenithpay.xyz/pay \
+curl -X POST https://zp-api-q4hd.onrender.com/pay \
   -H "Authorization: Bearer $ZENITHPAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "agentAddress": "0xcadf...1a9",
-    "serviceUrl": "https://api.usezenithpay.xyz/sell/agent-intel",
+    "serviceUrl": "https://zp-api-q4hd.onrender.com/sell/agent-intel",
     "maxAmount": "0.01",
     "intent": "Fetch paid seller intel"
   }'

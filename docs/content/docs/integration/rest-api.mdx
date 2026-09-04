@@ -6,7 +6,7 @@ description: ZenithPay REST endpoints for wallet, policy, payment, approvals, an
 ZenithPay REST API is the owner-facing control plane for onboarding, spend policy, and payment execution.
 
 ## Base URL
-`https://api.usezenithpay.xyz`
+`https://zp-api-q4hd.onrender.com`
 
 ## Authentication
 Use Bearer auth on protected endpoints.
@@ -38,7 +38,7 @@ Public endpoints:
 
 ## Example: create an agent wallet
 ```bash
-curl -X POST https://api.usezenithpay.xyz/wallet/genesis \
+curl -X POST https://zp-api-q4hd.onrender.com/wallet/genesis \
   -H "Authorization: Bearer $ZENITHPAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -49,7 +49,7 @@ curl -X POST https://api.usezenithpay.xyz/wallet/genesis \
 
 ## Example: pay a service
 ```bash
-curl -X POST https://api.usezenithpay.xyz/pay \
+curl -X POST https://zp-api-q4hd.onrender.com/pay \
   -H "Authorization: Bearer $ZENITHPAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{

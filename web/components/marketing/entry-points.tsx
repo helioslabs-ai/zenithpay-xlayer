@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
-const SKILL_CURL = "curl -s https://api.usezenithpay.xyz/skill.md";
+const SKILL_CURL = "curl -s https://zp-api-q4hd.onrender.com/skill.md";
 
 export function EntryPoints() {
   const [copied, setCopied] = useState(false);

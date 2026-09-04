@@ -50,7 +50,7 @@ const DEMO_POLICY: AgentPolicy = {
   address: DEMO_AGENT_ADDRESS,
   perTxLimit: "0.25",
   dailyBudget: "10",
-  allowlist: ["api.usezenithpay.xyz", "stableenrich.dev"],
+  allowlist: ["zp-api-q4hd.onrender.com", "stableenrich.dev"],
   approvalThreshold: "0.05",
   autoSwapEnabled: true,
   swapSlippageTolerance: "0.5",
@@ -58,16 +58,16 @@ const DEMO_POLICY: AgentPolicy = {
 };
 
 const DEMO_TRANSACTIONS: LedgerEntry[] = [
-  { id: "d1", agentAddress: DEMO_AGENT_ADDRESS, merchant: "api.usezenithpay.xyz", amount: "0.01", currency: "USDC", intent: "DeFi research on Base", status: "approved", reason: null, txHash: "0x3f2a1b8c...", swapUsed: false, okbSpent: null, createdAt: new Date(Date.now() - 1000 * 60 * 5).toISOString() },
-  { id: "d2", agentAddress: DEMO_AGENT_ADDRESS, merchant: "api.usezenithpay.xyz", amount: "0.01", currency: "USDC", intent: "Token price lookup", status: "approved", reason: null, txHash: "0x7a4c2d1e...", swapUsed: false, okbSpent: null, createdAt: new Date(Date.now() - 1000 * 60 * 12).toISOString() },
-  { id: "d3", agentAddress: DEMO_AGENT_ADDRESS, merchant: "api.usezenithpay.xyz", amount: "0.01", currency: "USDC", intent: "On-chain data fetch", status: "approved", reason: null, txHash: "0x9b3e5f2a...", swapUsed: false, okbSpent: null, createdAt: new Date(Date.now() - 1000 * 60 * 25).toISOString() },
-  { id: "d4", agentAddress: DEMO_AGENT_ADDRESS, merchant: "api.usezenithpay.xyz", amount: "0.01", currency: "USDC", intent: "Exceeds per-tx limit", status: "blocked", reason: "per_tx_limit", txHash: null, swapUsed: false, okbSpent: null, createdAt: new Date(Date.now() - 1000 * 60 * 40).toISOString() },
+  { id: "d1", agentAddress: DEMO_AGENT_ADDRESS, merchant: "zp-api-q4hd.onrender.com", amount: "0.01", currency: "USDC", intent: "DeFi research on Base", status: "approved", reason: null, txHash: "0x3f2a1b8c...", swapUsed: false, okbSpent: null, createdAt: new Date(Date.now() - 1000 * 60 * 5).toISOString() },
+  { id: "d2", agentAddress: DEMO_AGENT_ADDRESS, merchant: "zp-api-q4hd.onrender.com", amount: "0.01", currency: "USDC", intent: "Token price lookup", status: "approved", reason: null, txHash: "0x7a4c2d1e...", swapUsed: false, okbSpent: null, createdAt: new Date(Date.now() - 1000 * 60 * 12).toISOString() },
+  { id: "d3", agentAddress: DEMO_AGENT_ADDRESS, merchant: "zp-api-q4hd.onrender.com", amount: "0.01", currency: "USDC", intent: "On-chain data fetch", status: "approved", reason: null, txHash: "0x9b3e5f2a...", swapUsed: false, okbSpent: null, createdAt: new Date(Date.now() - 1000 * 60 * 25).toISOString() },
+  { id: "d4", agentAddress: DEMO_AGENT_ADDRESS, merchant: "zp-api-q4hd.onrender.com", amount: "0.01", currency: "USDC", intent: "Exceeds per-tx limit", status: "blocked", reason: "per_tx_limit", txHash: null, swapUsed: false, okbSpent: null, createdAt: new Date(Date.now() - 1000 * 60 * 40).toISOString() },
   { id: "d5", agentAddress: DEMO_AGENT_ADDRESS, merchant: "stableenrich.dev", amount: "0.05", currency: "USDC", intent: "Company data enrichment", status: "blocked", reason: "above_approval_threshold", txHash: null, swapUsed: false, okbSpent: null, createdAt: new Date(Date.now() - 1000 * 60 * 60).toISOString() },
-  { id: "d6", agentAddress: DEMO_AGENT_ADDRESS, merchant: "api.usezenithpay.xyz", amount: "0.01", currency: "USDC", intent: "Market index query", status: "approved", reason: null, txHash: "0x1c8d4a7b...", swapUsed: false, okbSpent: null, createdAt: new Date(Date.now() - 1000 * 60 * 90).toISOString() },
-  { id: "d7", agentAddress: DEMO_AGENT_ADDRESS, merchant: "api.usezenithpay.xyz", amount: "0.01", currency: "USDC", intent: "Swap rate check", status: "approved", reason: null, txHash: "0x5e2f9c3d...", swapUsed: false, okbSpent: null, createdAt: new Date(Date.now() - 1000 * 60 * 120).toISOString() },
+  { id: "d6", agentAddress: DEMO_AGENT_ADDRESS, merchant: "zp-api-q4hd.onrender.com", amount: "0.01", currency: "USDC", intent: "Market index query", status: "approved", reason: null, txHash: "0x1c8d4a7b...", swapUsed: false, okbSpent: null, createdAt: new Date(Date.now() - 1000 * 60 * 90).toISOString() },
+  { id: "d7", agentAddress: DEMO_AGENT_ADDRESS, merchant: "zp-api-q4hd.onrender.com", amount: "0.01", currency: "USDC", intent: "Swap rate check", status: "approved", reason: null, txHash: "0x5e2f9c3d...", swapUsed: false, okbSpent: null, createdAt: new Date(Date.now() - 1000 * 60 * 120).toISOString() },
   { id: "d8", agentAddress: DEMO_AGENT_ADDRESS, merchant: "stableenrich.dev", amount: "0.05", currency: "USDC", intent: "LinkedIn enrichment", status: "approved", reason: null, txHash: "0x8d1a3f6c...", swapUsed: true, okbSpent: "0.003", createdAt: new Date(Date.now() - 1000 * 60 * 150).toISOString() },
-  { id: "d9", agentAddress: DEMO_AGENT_ADDRESS, merchant: "api.usezenithpay.xyz", amount: "0.01", currency: "USDC", intent: "Balance check", status: "approved", reason: null, txHash: "0x2b7e4d9a...", swapUsed: false, okbSpent: null, createdAt: new Date(Date.now() - 1000 * 60 * 180).toISOString() },
-  { id: "d10", agentAddress: DEMO_AGENT_ADDRESS, merchant: "api.usezenithpay.xyz", amount: "0.25", currency: "USDC", intent: "Bulk data request", status: "blocked", reason: "per_tx_limit", txHash: null, swapUsed: false, okbSpent: null, createdAt: new Date(Date.now() - 1000 * 60 * 240).toISOString() },
+  { id: "d9", agentAddress: DEMO_AGENT_ADDRESS, merchant: "zp-api-q4hd.onrender.com", amount: "0.01", currency: "USDC", intent: "Balance check", status: "approved", reason: null, txHash: "0x2b7e4d9a...", swapUsed: false, okbSpent: null, createdAt: new Date(Date.now() - 1000 * 60 * 180).toISOString() },
+  { id: "d10", agentAddress: DEMO_AGENT_ADDRESS, merchant: "zp-api-q4hd.onrender.com", amount: "0.25", currency: "USDC", intent: "Bulk data request", status: "blocked", reason: "per_tx_limit", txHash: null, swapUsed: false, okbSpent: null, createdAt: new Date(Date.now() - 1000 * 60 * 240).toISOString() },
 ];
 
 export default function DashboardPage() {

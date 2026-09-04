@@ -6,7 +6,7 @@ description: Execute policy-gated payment orchestration (policy -> swap -> x402 
 ## Endpoint
 
 ```text
-POST https://api.usezenithpay.xyz/pay
+POST https://zp-api-q4hd.onrender.com/pay
 ```
 
 ## Auth
@@ -18,7 +18,7 @@ Bearer API key required.
 ```json
 {
   "agentAddress": "0x...",
-  "serviceUrl": "https://api.usezenithpay.xyz/sell/agent-intel",
+  "serviceUrl": "https://zp-api-q4hd.onrender.com/sell/agent-intel",
   "maxAmount": "0.01",
   "intent": "Fetch paid seller intelligence"
 }
@@ -34,7 +34,7 @@ Bearer API key required.
   "txHash": "0x...",
   "amount": "0.01",
 	"currency": "USDC",
-  "merchant": "api.usezenithpay.xyz",
+  "merchant": "zp-api-q4hd.onrender.com",
 	"remainingDailyBudget": "1.65",
   "settledAt": "2026-03-24T12:00:00.000Z"
 }

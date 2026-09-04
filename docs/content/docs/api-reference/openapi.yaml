@@ -3,7 +3,7 @@ info:
   title: ZenithPay REST API
   version: 0.1.0
 servers:
-  - url: https://api.usezenithpay.xyz
+  - url: https://zp-api-q4hd.onrender.com
 security:
   - bearerAuth: []
 components:

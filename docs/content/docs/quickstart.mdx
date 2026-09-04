@@ -8,7 +8,7 @@ This guide is the real operator flow: you start inside your AI agent, run skill 
 ## Production base URL
 
 ```text
-https://api.usezenithpay.xyz
+https://zp-api-q4hd.onrender.com
 ```
 
 ## Who does what
@@ -22,7 +22,7 @@ Paste this into your AI agent:
 
 ```text
 # Ask your AI agent: Read this skill and follow the onboarding instructions.
-curl -s https://api.usezenithpay.xyz/skill.md
+curl -s https://zp-api-q4hd.onrender.com/skill.md
 ```
 
 The skill drives onboarding in one session.
@@ -75,12 +75,12 @@ At this point your agent is linked and policy-gated.
 ## 4) Execute first policy-gated payment
 
 ```bash
-curl -X POST https://api.usezenithpay.xyz/pay \
+curl -X POST https://zp-api-q4hd.onrender.com/pay \
   -H "Authorization: Bearer $ZENITHPAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
     "agentAddress": "0xYOUR_AGENT",
-    "serviceUrl": "https://api.usezenithpay.xyz/sell/agent-intel",
+    "serviceUrl": "https://zp-api-q4hd.onrender.com/sell/agent-intel",
     "maxAmount": "0.01",
     "intent": "First policy-gated x402 payment test"
   }'
@@ -103,7 +103,7 @@ Check:
 Example balance check:
 
 ```bash
-curl -s "https://api.usezenithpay.xyz/wallet/balance?address=0xYOUR_AGENT"
+curl -s "https://zp-api-q4hd.onrender.com/wallet/balance?address=0xYOUR_AGENT"
 ```
 
 ## 6) Move to persistent MCP usage

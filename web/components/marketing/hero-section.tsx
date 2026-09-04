@@ -130,7 +130,7 @@ interface TerminalLine {
 
 const TERMINAL_LINES: TerminalLine[] = [
 	{ id: "c1", type: "comment", text: "// Any agent · any runtime — works everywhere" },
-	{ id: "p1", type: "prompt", text: "curl -s https://api.usezenithpay.xyz/skill.md" },
+	{ id: "p1", type: "prompt", text: "curl -s https://zp-api-q4hd.onrender.com/skill.md" },
 	{ id: "o1", type: "output", text: "  → ZenithPay loaded · 6 tools ready" },
 	{ id: "g1", type: "gap" },
 	{ id: "c2", type: "comment", text: "// Agent task: Research DeFi yields on Base" },

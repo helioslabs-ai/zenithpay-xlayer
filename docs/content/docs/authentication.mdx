@@ -12,7 +12,7 @@ ZenithPay supports three integration surfaces:
 ## Base URL
 
 ```text
-https://api.usezenithpay.xyz
+https://zp-api-q4hd.onrender.com
 ```
 
 ## REST API (Bearer auth)
@@ -41,7 +41,7 @@ Notes:
 
 ### Example: `POST /pay`
 ```bash
-curl -X POST https://api.usezenithpay.xyz/pay \
+curl -X POST https://zp-api-q4hd.onrender.com/pay \
   -H "Authorization: Bearer $ZENITHPAY_API_KEY" \
   -H "Content-Type: application/json" \
   -d '{
@@ -62,7 +62,7 @@ MCP requests are authenticated with:
 MCP URL:
 
 ```text
-https://api.usezenithpay.xyz/mcp
+https://zp-api-q4hd.onrender.com/mcp
 ```
 
 Example config:
@@ -71,7 +71,7 @@ Example config:
 {
   "mcpServers": {
     "zenithpay": {
-      "url": "https://api.usezenithpay.xyz/mcp",
+      "url": "https://zp-api-q4hd.onrender.com/mcp",
       "env": {
         "AGENT_ADDRESS": "0xcadf...1a9",
         "ZENITHPAY_API_KEY": "your_api_key_here"
@@ -86,7 +86,7 @@ Example config:
 Skill URL:
 
 ```text
-https://api.usezenithpay.xyz/skill.md
+https://zp-api-q4hd.onrender.com/skill.md
 ```
 
 The skill performs one-session onboarding and prepares persistent MCP usage.

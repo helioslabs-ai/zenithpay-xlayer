@@ -34,7 +34,7 @@ const CODE: Record<Tab, React.ReactNode> = {
 			</div>
 			<div className="mt-1 flex items-start gap-1.5">
 				<Dim>$</Dim>
-				<Val>curl -s https://api.usezenithpay.xyz/skill.md</Val>
+				<Val>curl -s https://zp-api-q4hd.onrender.com/skill.md</Val>
 			</div>
 			<div className="mt-2">
 				<Acc> → ZenithPay skill loaded · 6 tools ready</Acc>
@@ -100,7 +100,7 @@ const CODE: Record<Tab, React.ReactNode> = {
 			<div className="pl-12">
 				<Str>"url"</Str>
 				<Dim>: </Dim>
-				<Str>"https://api.usezenithpay.xyz/mcp"</Str>
+				<Str>"https://zp-api-q4hd.onrender.com/mcp"</Str>
 				<Dim>,</Dim>
 			</div>
 			<div className="pl-12">
@@ -168,7 +168,7 @@ const CODE: Record<Tab, React.ReactNode> = {
 				<Dim>(</Dim>
 			</div>
 			<div className="pl-4">
-				<Str>"https://api.usezenithpay.xyz/pay"</Str>
+				<Str>"https://zp-api-q4hd.onrender.com/pay"</Str>
 				<Dim>,</Dim>
 			</div>
 			<div className="pl-4">
@@ -371,7 +371,7 @@ export function IntegrationsSection() {
 								</div>
 								<span className="absolute inset-0 flex items-center justify-center text-[10px] font-mono text-muted-foreground/40 pointer-events-none tracking-wide">
 									{activeTab === "SKILL.md"
-										? "api.usezenithpay.xyz/skill.md"
+										? "zp-api-q4hd.onrender.com/skill.md"
 										: activeTab === "MCP"
 											? ".claude/settings.json"
 											: "zenithpay-pay.ts"}

@@ -1,6 +1,6 @@
 # ZenithPay API Reference
 
-**Base URL:** `https://api.usezenithpay.xyz`
+**Base URL:** `https://zp-api-q4hd.onrender.com`
 
 **Auth:** `Authorization: Bearer $ZENITHPAY_API_KEY` (your `zpk_...` key from `~/.zenithpay/config.json`)
 
@@ -38,14 +38,14 @@ Health check. No auth required.
 Serves this skill file. No auth required. Agents curl this to get ZenithPay tools.
 
 ```bash
-curl -s https://api.usezenithpay.xyz/skill.md
+curl -s https://zp-api-q4hd.onrender.com/skill.md
 ```
 
 ---
 
 ### MCP server
 
-Available at `https://api.usezenithpay.xyz/mcp` via StreamableHTTP transport. Exposes all 6 agent tools. Not consumable from a browser — requires an MCP-compatible client.
+Available at `https://zp-api-q4hd.onrender.com/mcp` via StreamableHTTP transport. Exposes all 6 agent tools. Not consumable from a browser — requires an MCP-compatible client.
 
 MCP config:
 
@@ -54,7 +54,7 @@ MCP config:
 	"mcpServers": {
 		"zenithpay": {
 			"type": "http",
-			"url": "https://api.usezenithpay.xyz/mcp",
+			"url": "https://zp-api-q4hd.onrender.com/mcp",
 			"headers": {
 				"Authorization": "Bearer zpk_...",
 				"X-Agent-Address": "0x..."
@@ -237,7 +237,7 @@ x402-protected seller route for end-to-end buyer/seller settlement on Base.
 **URL**
 
 ```text
-https://api.usezenithpay.xyz/sell/agent-intel
+https://zp-api-q4hd.onrender.com/sell/agent-intel
 ```
 
 **Notes**

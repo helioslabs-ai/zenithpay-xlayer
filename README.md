@@ -196,7 +196,7 @@ Limits are enforced at the smart contract level. Even if ZenithPay's API goes do
 
 ```bash
 # Tell your agent:
-Read https://api.usezenithpay.xyz/skill.md and follow the setup and onboarding instructions
+Read https://zp-api-q4hd.onrender.com/skill.md and follow the setup and onboarding instructions
 ```
 
 **What happens:**
@@ -219,8 +219,8 @@ zenithpay_get_limits -> zenithpay_balance -> zenithpay_verify_merchant -> zenith
 
 | Method    | Command                                                                                                 |
 | --------- | ------------------------------------------------------------------------------------------------------- |
-| **Skill** | `curl -s https://api.usezenithpay.xyz/skill.md` — agent reads, gets tools + onboarding                  |
-| **MCP**   | Add to config: `url: https://api.usezenithpay.xyz/mcp` with `Authorization` + `X-Agent-Address` headers |
+| **Skill** | `curl -s https://zp-api-q4hd.onrender.com/skill.md` — agent reads, gets tools + onboarding                  |
+| **MCP**   | Add to config: `url: https://zp-api-q4hd.onrender.com/mcp` with `Authorization` + `X-Agent-Address` headers |
 | **REST**  | `POST /pay` with Bearer token — any language, any framework                                             |
 
 ---
@@ -402,7 +402,7 @@ zenithpay-buildx/
 |   +-- src/SpendPolicy.sol                     # Onchain enforcement -- PaymentExecuted/Blocked
 |
 +-- skills/
-|   +-- spend-agent/SKILL.md                    # Agent Skill -- curl https://api.usezenithpay.xyz/skill.md
+|   +-- spend-agent/SKILL.md                    # Agent Skill -- curl https://zp-api-q4hd.onrender.com/skill.md
 |
 +-- web/                                        # Next.js 16 -- marketing + dashboard
 |   +-- components/

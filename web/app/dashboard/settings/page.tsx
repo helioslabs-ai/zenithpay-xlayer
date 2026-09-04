@@ -241,7 +241,7 @@ export default function SettingsPage() {
   const maskedKey = apiKey
     ? `${apiKey.slice(0, 8)}${"•".repeat(apiKey.length - 12)}${apiKey.slice(-4)}`
     : "zpk_••••••••••••••••••••••••••••••••";
-  const curlCommand = `curl https://api.usezenithpay.xyz/skill.md`;
+  const curlCommand = `curl https://zp-api-q4hd.onrender.com/skill.md`;
 
   return (
     <div className="space-y-6">
@@ -518,7 +518,7 @@ export default function SettingsPage() {
           </div>
 
           <a
-            href="https://api.usezenithpay.xyz/skill.md"
+            href="https://zp-api-q4hd.onrender.com/skill.md"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground underline underline-offset-4"

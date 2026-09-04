@@ -28,7 +28,7 @@ metadata:
 
 Security middleware for AI agents that spend money. Policy-enforced x402 payments on Base. Wallet managed by Privy — private key never on your machine.
 
-**Base URL:** `https://api.usezenithpay.xyz`
+**Base URL:** `https://zp-api-q4hd.onrender.com`
 
 ---
 
@@ -62,7 +62,7 @@ No private key will be stored on your machine. The wallet is managed by Privy.
 Once the user provides both, call:
 
 ```bash
-curl -s -X POST https://api.usezenithpay.xyz/wallet/genesis \
+curl -s -X POST https://zp-api-q4hd.onrender.com/wallet/genesis \
   -H "Content-Type: application/json" \
   -d '{"email": "<user-email>", "label": "<agent-name>"}'
 ```
@@ -109,7 +109,7 @@ Register ZenithPay as an MCP server so tools persist across all future sessions.
 claude mcp add --transport http --scope user \
   --header "Authorization: Bearer $ZENITHPAY_API_KEY" \
   --header "X-Agent-Address: $AGENT_ADDRESS" \
-  zenithpay https://api.usezenithpay.xyz/mcp
+  zenithpay https://zp-api-q4hd.onrender.com/mcp
 ```
 
 **Cursor / Windsurf / Claude Desktop — add to your MCP config file:**
@@ -119,7 +119,7 @@ claude mcp add --transport http --scope user \
   "mcpServers": {
     "zenithpay": {
       "type": "http",
-      "url": "https://api.usezenithpay.xyz/mcp",
+      "url": "https://zp-api-q4hd.onrender.com/mcp",
       "headers": {
         "Authorization": "Bearer <apiKey>",
         "X-Agent-Address": "<agentAddress>"
@@ -140,7 +140,7 @@ Config file locations:
 {
   "mcpServers": {
     "zenithpay": {
-      "httpUrl": "https://api.usezenithpay.xyz/mcp",
+      "httpUrl": "https://zp-api-q4hd.onrender.com/mcp",
       "headers": {
         "Authorization": "Bearer <apiKey>",
         "X-Agent-Address": "<agentAddress>"
@@ -156,7 +156,7 @@ Config file locations:
 from agents.mcp import MCPServerHTTP
 
 zenithpay = MCPServerHTTP(
-    url="https://api.usezenithpay.xyz/mcp",
+    url="https://zp-api-q4hd.onrender.com/mcp",
     headers={
         "Authorization": "Bearer <apiKey>",
         "X-Agent-Address": "<agentAddress>"
@@ -205,7 +205,7 @@ Wait for the user to confirm they have completed the dashboard step.
 ZENITHPAY_API_KEY=$(cat ~/.zenithpay/config.json | grep apiKey | cut -d'"' -f4)
 AGENT_ADDRESS=$(cat ~/.zenithpay/config.json | grep agentAddress | cut -d'"' -f4)
 
-curl -s "https://api.usezenithpay.xyz/limits?address=$AGENT_ADDRESS" \
+curl -s "https://zp-api-q4hd.onrender.com/limits?address=$AGENT_ADDRESS" \
   -H "Authorization: Bearer $ZENITHPAY_API_KEY"
 ```
 
@@ -310,7 +310,7 @@ POST /pay
 Authorization: Bearer ${ZENITHPAY_API_KEY}
 {
   "agentAddress": "${AGENT_ADDRESS}",
-  "serviceUrl": "https://api.usezenithpay.xyz/sell/agent-intel",
+  "serviceUrl": "https://zp-api-q4hd.onrender.com/sell/agent-intel",
   "maxAmount": "0.01",
   "intent": "Fetch live Base DeFi intelligence"
 }
@@ -399,4 +399,4 @@ To deny: `POST /approvals/:id/deny`
 ## API Reference
 
 Full endpoint documentation with all request schemas and response shapes:
-`https://api.usezenithpay.xyz/references/api_docs.md`
+`https://zp-api-q4hd.onrender.com/references/api_docs.md`
