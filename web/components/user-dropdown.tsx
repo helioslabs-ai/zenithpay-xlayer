@@ -1,13 +1,12 @@
 "use client";
 
+import { usePrivy } from "@privy-io/react-auth";
 import { LayoutDashboard, LogOut } from "lucide-react";
 import Link from "next/link";
-import { toast } from "sonner";
-import { useChainId, useConnect, useConnection, useConnectors, useDisconnect, useSwitchChain } from "wagmi";
+import { useAccount } from "wagmi";
 import { useAgent } from "@/components/dashboard/agent-context";
 import ModeToggle from "@/components/theme-toggle/mode-toggle";
 import { Button } from "@/components/ui/button";
-import { getOkxConnector, hasOkxWallet, XLAYER_CHAIN_ID } from "@/lib/okx-wallet";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,54 +21,24 @@ function truncateAddress(address: string) {
 }
 
 export function UserDropdown() {
-  const { address, isConnected, status } = useConnection();
-  const { connectAsync } = useConnect();
-  const { switchChainAsync } = useSwitchChain();
-  const chainId = useChainId();
-  const connectors = useConnectors();
-  const { mutate: disconnect } = useDisconnect();
+  const { ready, authenticated, login, logout, user } = usePrivy();
+  const { address } = useAccount();
   const { agentDisplayName } = useAgent();
-  const isReady = status !== "connecting" && status !== "reconnecting";
 
-  if (!isReady) {
+  if (!ready) {
     return <div className="size-8 rounded-none bg-muted animate-pulse" />;
   }
 
-  async function handleConnect() {
-    if (!hasOkxWallet()) {
-      toast.error("OKX Wallet extension not detected", {
-        description: "Install OKX Wallet to connect to ZenithPay.",
-      });
-      return;
-    }
-
-    const okxConnector = getOkxConnector(connectors);
-    if (!okxConnector) {
-      toast.error("OKX Wallet connector unavailable");
-      return;
-    }
-
-    try {
-      await connectAsync({ connector: okxConnector });
-      if (chainId !== XLAYER_CHAIN_ID) {
-        await switchChainAsync({ chainId: XLAYER_CHAIN_ID });
-      }
-    } catch {
-      toast.error("Wallet connection was cancelled or failed");
-    }
-  }
-
-  if (!isConnected) {
+  if (!authenticated) {
     return (
-      <Button
-        variant="ghost"
-        className="rounded-none"
-        onClick={handleConnect}
-      >
+      <Button variant="ghost" className="rounded-none" onClick={login}>
         Sign in
       </Button>
     );
   }
+
+  const displayAddress = address ? truncateAddress(address) : null;
+  const email = user?.email?.address;
 
   return (
     <DropdownMenu>
@@ -87,9 +56,14 @@ export function UserDropdown() {
             <span className="text-xs font-medium truncate w-full text-left">
               {agentDisplayName}
             </span>
-            {address && (
+            {email && (
               <span className="text-[10px] font-mono text-muted-foreground">
-                {truncateAddress(address)}
+                {email}
+              </span>
+            )}
+            {!email && displayAddress && (
+              <span className="text-[10px] font-mono text-muted-foreground">
+                {displayAddress}
               </span>
             )}
           </div>
@@ -102,9 +76,12 @@ export function UserDropdown() {
         <DropdownMenuLabel className="font-normal">
           <div className="space-y-0.5">
             <p className="text-xs font-medium">{agentDisplayName}</p>
-            {address && (
+            {email && (
+              <p className="text-[10px] text-muted-foreground">{email}</p>
+            )}
+            {displayAddress && (
               <p className="text-[10px] text-muted-foreground font-mono">
-                {truncateAddress(address)}
+                {displayAddress}
               </p>
             )}
           </div>
@@ -125,7 +102,7 @@ export function UserDropdown() {
           />
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="rounded-none" onClick={() => disconnect()}>
+        <DropdownMenuItem className="rounded-none" onClick={logout}>
           <LogOut className="mr-2 size-4" />
           Sign out
         </DropdownMenuItem>

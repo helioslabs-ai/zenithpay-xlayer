@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import {
   useChainId,
   useConnect,
-  useConnection,
+  useAccount,
   useConnectors,
   useSignMessage,
   useSwitchChain,
@@ -30,9 +30,11 @@ import {
   SPEND_POLICY_ABI,
   SPEND_POLICY_ADDRESS,
   usdcToUnits,
-  XLAYER_EXPLORER,
+  BASE_EXPLORER,
+  BASE_USDC_ADDRESS,
 } from "@/lib/contracts";
-import { getOkxConnector, hasOkxWallet, XLAYER_CHAIN_ID } from "@/lib/okx-wallet";
+
+const BASE_CHAIN_ID = 8453;
 
 type Step = "connect" | "policy" | "signing" | "fund" | "done";
 
@@ -60,7 +62,7 @@ const PRESETS = {
   },
 } as const;
 
-const XLAYER_USDG = "0x4ae46a509f6b1d9056937ba4500cb143933d2dc8";
+const BASE_USDC = BASE_USDC_ADDRESS;
 
 const STEPS: { key: Step; label: string }[] = [
   { key: "connect", label: "Connect" },
@@ -78,7 +80,7 @@ export function OnboardingFlow() {
   const searchParams = useSearchParams();
   const agentAddress = searchParams.get("agent");
 
-  const { address, isConnected } = useConnection();
+  const { address, isConnected } = useAccount();
   const { connectAsync, isPending: connectPending } = useConnect();
   const { switchChainAsync } = useSwitchChain();
   const chainId = useChainId();
@@ -120,23 +122,16 @@ export function OnboardingFlow() {
   }
 
   async function handleConnect() {
-    if (!hasOkxWallet()) {
-      toast.error("OKX Wallet extension not detected", {
-        description: "Install OKX Wallet to continue onboarding.",
-      });
-      return;
-    }
-
-    const okxConnector = getOkxConnector(connectors);
-    if (!okxConnector) {
-      toast.error("OKX Wallet connector unavailable");
+    const connector = connectors[0];
+    if (!connector) {
+      toast.error("No wallet connector available");
       return;
     }
 
     try {
-      await connectAsync({ connector: okxConnector });
-      if (chainId !== XLAYER_CHAIN_ID) {
-        await switchChainAsync({ chainId: XLAYER_CHAIN_ID });
+      await connectAsync({ connector });
+      if (chainId !== BASE_CHAIN_ID) {
+        await switchChainAsync({ chainId: BASE_CHAIN_ID });
       }
     } catch {
       toast.error("Wallet connection was cancelled or failed");
@@ -267,12 +262,12 @@ export function OnboardingFlow() {
           </div>
         </div>
         <a
-          href={`${XLAYER_EXPLORER}/address/${agentAddress}`}
+          href={`${BASE_EXPLORER}/address/${agentAddress}`}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-1 text-[10px] border px-1.5 py-0.5 font-mono text-muted-foreground hover:text-foreground hover:border-foreground transition-colors shrink-0"
         >
-          X Layer · 196
+          Base · 8453
           <ExternalLink className="size-2.5" />
         </a>
       </div>
@@ -367,7 +362,7 @@ export function OnboardingFlow() {
             )}
           </Button>
           <p className="text-xs text-muted-foreground text-center">
-            Supports OKX Wallet extension
+            Supports wallets via Privy
           </p>
         </div>
       )}
@@ -432,7 +427,7 @@ export function OnboardingFlow() {
                 htmlFor="perTx"
                 className="text-xs uppercase tracking-wider"
               >
-                Per-Transaction Limit (USDG)
+                Per-Transaction Limit (USDC)
               </Label>
               <Input
                 id="perTx"
@@ -446,7 +441,7 @@ export function OnboardingFlow() {
                 htmlFor="daily"
                 className="text-xs uppercase tracking-wider"
               >
-                Daily Budget (USDG)
+                Daily Budget (USDC)
               </Label>
               <Input
                 id="daily"
@@ -460,7 +455,7 @@ export function OnboardingFlow() {
                 htmlFor="threshold"
                 className="text-xs uppercase tracking-wider"
               >
-                Approval Threshold (USDG)
+                Approval Threshold (USDC)
               </Label>
               <Input
                 id="threshold"
@@ -495,7 +490,7 @@ export function OnboardingFlow() {
             )}
           </Button>
           <p className="text-xs text-muted-foreground text-center">
-            Calls SpendPolicy.registerAgent() on X Layer — gas ~$0.001 in OKB
+            Calls SpendPolicy.registerAgent() on Base — gas ~$0.001 in ETH
           </p>
         </div>
       )}
@@ -508,13 +503,13 @@ export function OnboardingFlow() {
             <div className="text-center space-y-2">
               <p className="text-sm text-muted-foreground">
                 {waitingForTx
-                  ? "Waiting for confirmation on X Layer..."
+                  ? "Waiting for confirmation on Base..."
                   : txConfirmed
                     ? "Transaction confirmed — saving policy..."
                     : "Transaction submitted..."}
               </p>
               <a
-                href={`${XLAYER_EXPLORER}/tx/${txHash}`}
+                href={`${BASE_EXPLORER}/tx/${txHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-1 text-[10px] font-mono text-muted-foreground hover:text-foreground underline underline-offset-4"
@@ -548,7 +543,7 @@ export function OnboardingFlow() {
 
           {txHash && (
             <a
-              href={`${XLAYER_EXPLORER}/tx/${txHash}`}
+              href={`${BASE_EXPLORER}/tx/${txHash}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 text-[10px] font-mono text-muted-foreground hover:text-foreground border border-dashed px-3 py-2"
@@ -590,14 +585,14 @@ export function OnboardingFlow() {
 
           <div className="space-y-0 border border-dashed">
             {[
-              { label: "Network", value: "X Layer mainnet (196)" },
+              { label: "Network", value: "Base mainnet (8453)" },
               {
-                label: "USDG",
-                value: `${XLAYER_USDG.slice(0, 10)}...${XLAYER_USDG.slice(-8)}`,
+                label: "USDC",
+                value: `${BASE_USDC.slice(0, 10)}...${BASE_USDC.slice(-8)}`,
               },
               {
                 label: "Gas token",
-                value: "OKB (optional — only needed for non-x402 transactions)",
+                value: "ETH (optional — only needed for non-x402 transactions)",
               },
             ].map(({ label, value }) => (
               <div

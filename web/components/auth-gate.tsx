@@ -1,9 +1,9 @@
 "use client";
 
+import { usePrivy } from "@privy-io/react-auth";
 import { useRouter } from "next/navigation";
-import type { ReactNode } from "react";
 import { useEffect } from "react";
-import { useConnection } from "wagmi";
+import type { ReactNode } from "react";
 
 interface AuthGateProps {
   children: ReactNode;
@@ -11,22 +11,21 @@ interface AuthGateProps {
 }
 
 export function AuthGate({ children, isDemo }: AuthGateProps) {
-  const { isConnected, status } = useConnection();
+  const { ready, authenticated } = usePrivy();
   const router = useRouter();
-  const isReady = status !== "connecting" && status !== "reconnecting";
 
   useEffect(() => {
     if (isDemo) return;
-    if (isReady && !isConnected) {
+    if (ready && !authenticated) {
       router.push("/signin");
     }
-  }, [isReady, isConnected, router, isDemo]);
+  }, [ready, authenticated, router, isDemo]);
 
   if (isDemo) {
     return <>{children}</>;
   }
 
-  if (!isReady) {
+  if (!ready) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="size-8 animate-pulse rounded-none bg-muted" />
@@ -34,7 +33,7 @@ export function AuthGate({ children, isDemo }: AuthGateProps) {
     );
   }
 
-  if (!isConnected) {
+  if (!authenticated) {
     return null;
   }
 

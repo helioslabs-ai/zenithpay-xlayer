@@ -4,21 +4,21 @@ description: >
   Use this skill when an agent needs to make payments, check wallet balance,
   verify merchants, set or read spending limits, query transaction history,
   review pending approvals, or interact with any x402-compatible service on
-  X Layer. Also trigger on: setup ZenithPay, create agent wallet, onboard,
+  Base. Also trigger on: setup ZenithPay, create agent wallet, onboard,
   first time setup, I don't have a wallet, zenithpay setup, activate agent.
   Trigger on: pay for service, execute payment, check balance, check funds,
   verify merchant, set limits, update policy, spending policy, view ledger,
-  audit trail, approve payment, deny payment, x402 payment, USDG payment,
+  audit trail, approve payment, deny payment, x402 payment, USDC payment,
   agent wallet, spend policy, daily budget, per-transaction limit, merchant
   allowlist, approval threshold, ZenithPay, zenithpay_pay_service,
   zenithpay_balance, zenithpay_get_limits, zenithpay_set_limits,
   zenithpay_verify_merchant, zenithpay_ledger. Security middleware for AI
-  agents that spend money — policy-enforced x402 payments on X Layer via
+  agents that spend money — policy-enforced x402 payments on Base via
   ZenithPay. Do NOT use for non-payment tasks.
 user-invocable: true
 metadata:
   author: zenithpay
-  version: "1.1.0"
+  version: "2.0.0"
   homepage: "https://usezenithpay.xyz"
 ---
 
@@ -26,7 +26,7 @@ metadata:
 
 > **You are an AI agent. Read this skill file fully before doing anything else.**
 
-Security middleware for AI agents that spend money. Policy-enforced x402 payments on X Layer. Private key lives in OKX TEE — never on your machine.
+Security middleware for AI agents that spend money. Policy-enforced x402 payments on Base. Wallet managed by Privy — private key never on your machine.
 
 **Base URL:** `https://api.usezenithpay.xyz`
 
@@ -56,7 +56,7 @@ To create your ZenithPay agent wallet, I need two things:
 1. Your email address — used to identify your account
 2. A name for this agent — e.g. "research-agent", "shopping-bot", "my-assistant"
 
-No private key will be stored on your machine. The key lives in OKX's TEE secure enclave.
+No private key will be stored on your machine. The wallet is managed by Privy.
 ```
 
 Once the user provides both, call:
@@ -86,10 +86,10 @@ EOF
 Tell the user:
 
 ```
-✅ Agent wallet created: <agentAddress>
-🔑 API key saved to ~/.zenithpay/config.json — keep this file safe, treat it like a password.
+Agent wallet created: <agentAddress>
+API key saved to ~/.zenithpay/config.json — keep this file safe, treat it like a password.
 
-No private key is stored — your wallet is secured by OKX TEE infrastructure.
+No private key is stored — your wallet is managed by Privy infrastructure.
 ```
 
 ### Step 4 — Install MCP (persistent tools) {#install-mcp}
@@ -167,7 +167,7 @@ zenithpay = MCPServerHTTP(
 After adding the config, tell the user:
 
 ```
-✅ ZenithPay MCP server registered.
+ZenithPay MCP server registered.
 
 The 6 payment tools will appear natively after you restart your agent session.
 Before restarting, complete Step 5 below to activate your spend policy.
@@ -180,21 +180,21 @@ The agent wallet exists but cannot spend yet. A human must set the spend policy 
 Tell the user:
 
 ```
-⚠️  This agent cannot spend yet.
+This agent cannot spend yet.
 
 A human must activate it by setting a spend policy.
 Open this link in your browser:
 
-→ https://usezenithpay.xyz/onboarding?agent=<agentAddress>
+-> https://usezenithpay.xyz/onboarding?agent=<agentAddress>
 
 Steps:
-1. Connect your wallet (OKX Web Wallet or MetaMask)
+1. Connect your wallet (via Privy)
 2. Set spend limits (or choose a preset)
 3. Sign the transaction onchain
 4. Return here when done
 
 This ensures you remain in control of how the agent uses funds.
-The policy is enforced by a smart contract on X Layer — ZenithPay cannot override it.
+The policy is enforced by a smart contract on Base — ZenithPay cannot override it.
 ```
 
 Wait for the user to confirm they have completed the dashboard step.
@@ -212,7 +212,7 @@ curl -s "https://api.usezenithpay.xyz/limits?address=$AGENT_ADDRESS" \
 If `perTxLimit` and `dailyBudget` are non-zero — policy is active. Tell the user:
 
 ```
-✅ Policy detected. Agent is ready to spend.
+Policy detected. Agent is ready to spend.
 
 Limits:
 - Per transaction: $<perTxLimit>
@@ -225,13 +225,13 @@ If policy is still zero — ask the user to complete the dashboard step and try 
 ### Setup complete
 
 ```
-✅ ZenithPay setup complete.
+ZenithPay setup complete.
 
 Summary:
 - Agent wallet: <agentAddress>
 - Config: ~/.zenithpay/config.json
 - MCP server: registered (restart agent to activate tools)
-- Policy: active on X Layer
+- Policy: active on Base
 
 Restart your agent session. The zenithpay_* tools will appear natively.
 ```
@@ -243,11 +243,11 @@ Restart your agent session. The zenithpay_* tools will appear natively.
 Once MCP tools are available, run this at the start of every session that involves spending:
 
 ```
-1. zenithpay_get_limits()       → understand your policy before any spend
-2. zenithpay_balance()          → confirm funds are available
-3. zenithpay_verify_merchant()  → safety check the merchant before paying
-4. zenithpay_pay_service()      → execute the payment
-5. zenithpay_ledger()           → review audit trail at end of session
+1. zenithpay_get_limits()       -> understand your policy before any spend
+2. zenithpay_balance()          -> confirm funds are available
+3. zenithpay_verify_merchant()  -> safety check the merchant before paying
+4. zenithpay_pay_service()      -> execute the payment
+5. zenithpay_ledger()           -> review audit trail at end of session
 ```
 
 ---
@@ -278,15 +278,15 @@ GET /wallet/balance?address=${AGENT_ADDRESS}
 Authorization: Bearer ${ZENITHPAY_API_KEY}
 ```
 
-Returns: `USDG` balance, `OKB` balance, `remainingDailyBudget`
+Returns: `USDC` balance, `ETH` balance, `remainingDailyBudget`
 
-If USDG balance is insufficient, ZenithPay will auto-swap OKB to USDG internally — but only if OKB balance is sufficient to cover the swap. If both are zero, do not proceed.
+If USDC balance is insufficient to cover the payment, do not proceed. Tell the user to fund the agent wallet with USDC on Base.
 
 ---
 
 ### zenithpay_verify_merchant
 
-Run this before paying any merchant you have not paid before. Executes an OKX security scan and checks the agent's allowlist.
+Run this before paying any merchant you have not paid before. Checks the agent's allowlist.
 
 ```
 POST /verify-merchant
@@ -303,7 +303,7 @@ If `allowlisted: false` and the agent policy has an allowlist set — the paymen
 
 ### zenithpay_pay_service
 
-Execute a policy-gated x402 payment. The onchain SpendPolicy contract is checked before any money moves. Auto-swap from OKB to USDG happens internally if needed.
+Execute a policy-gated x402 payment. The onchain SpendPolicy contract is checked before any money moves.
 
 ```
 POST /pay
@@ -312,7 +312,7 @@ Authorization: Bearer ${ZENITHPAY_API_KEY}
   "agentAddress": "${AGENT_ADDRESS}",
   "serviceUrl": "https://api.usezenithpay.xyz/sell/agent-intel",
   "maxAmount": "0.01",
-  "intent": "Fetch live X Layer DeFi intelligence"
+  "intent": "Fetch live Base DeFi intelligence"
 }
 ```
 
@@ -330,8 +330,7 @@ Block reasons:
 - `per_tx_limit_exceeded` — amount is above the per-transaction cap. Reduce `maxAmount`.
 - `daily_budget_exceeded` — agent has spent its daily budget. Wait for reset or ask human to raise the limit.
 - `merchant_not_allowlisted` — this merchant is not on the agent's allowlist. Ask human to add it.
-- `insufficient_balance` — not enough USDG or OKB to cover the payment and any swap.
-- `swap_quote_failed` — OKX DEX could not produce a swap quote. Try again later.
+- `insufficient_balance` — not enough USDC to cover the payment.
 - `payment_failed` — x402 settlement failed after policy cleared. Try again.
 
 ---
@@ -368,7 +367,7 @@ Authorization: Bearer ${ZENITHPAY_API_KEY}
 
 Optional query params: `limit` (default 20, max 200), `offset`, `status` (`approved`, `blocked`, `pending`, `denied`)
 
-Returns: array of transactions with `merchant`, `amount`, `intent`, `status`, `txHash`, `timestamp`, `swapUsed`, `okbSpent`
+Returns: array of transactions with `merchant`, `amount`, `intent`, `status`, `txHash`, `timestamp`
 
 ---
 

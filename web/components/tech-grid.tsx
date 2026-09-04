@@ -4,31 +4,29 @@ import Link from "next/link"
 
 const stack: { name: string; desc: string; href: string; icon: LucideIcon }[] = [
 	{
-		name: "X Layer",
+		name: "Base",
 		desc: "Chain",
-		href: "https://www.okx.com/xlayer",
+		href: "https://base.org",
 		icon: Expand,
 	},
 	{
-		name: "OnchainOS",
-		desc: "OKX APIs",
-		href: "https://web3.okx.com/onchain-os",
+		name: "Privy",
+		desc: "Agent wallets",
+		href: "https://privy.io",
+		icon: WalletCards,
+	},
+	{
+		name: "SpendPolicy",
+		desc: "Onchain rules",
+		href: "https://basescan.org",
 		icon: Layers,
 	},
 	{
-		name: "Agentic Wallet",
-		desc: "TEE wallet",
-		href: "https://web3.okx.com/onchainos",
-		icon: WalletCards,
-	},
-
-	{
-		name: "DApp Connect",
-		desc: "Connect OKX Wallet",
-		href: "https://web3.okx.com",
+		name: "USDC",
+		desc: "Settlement",
+		href: "https://www.circle.com/usdc",
 		icon: Wallet,
 	},
-
 	{
 		name: "x402",
 		desc: "Payments",

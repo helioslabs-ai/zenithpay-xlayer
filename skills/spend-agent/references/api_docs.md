@@ -68,7 +68,7 @@ MCP config:
 
 ### POST /wallet/genesis
 
-Create a TEE-secured agent wallet via OKX Agentic Wallet. Private key never leaves the TEE. Public — no auth required.
+Create a Privy-managed agent wallet. Private key is managed server-side by Privy. Public — no auth required.
 
 **Request**
 
@@ -88,7 +88,7 @@ Create a TEE-secured agent wallet via OKX Agentic Wallet. Private key never leav
 }
 ```
 
-Idempotent — calling again with the same OKX account returns the existing agent and API key.
+Idempotent — calling again with the same account returns the existing agent and API key.
 
 ---
 
@@ -119,7 +119,7 @@ Can only succeed when `owner_eoa` is the zero address (prevents hijacking). Once
 
 ### GET /wallet/balance
 
-Get USDG + OKB balance and remaining daily budget. Public read — no auth required.
+Get USDC + ETH balance and remaining daily budget. Public read — no auth required.
 
 **Query params:** `address` (optional — filters to specific agent)
 
@@ -130,8 +130,8 @@ Get USDG + OKB balance and remaining daily budget. Public read — no auth requi
 	"agents": [
 		{
 			"agentAddress": "0x...",
-			"usdgBalance": "12.50",
-			"okbBalance": "0.80",
+			"usdcBalance": "12.50",
+			"ethBalance": "0.01",
 			"remainingDailyBudget": "1.75"
 		}
 	]
@@ -161,7 +161,7 @@ List all agents owned by an EOA. Public read — pass `X-Owner-Address` header.
 
 ### POST /pay
 
-Execute a policy-gated x402 payment. SpendPolicy.sol is checked onchain before any money moves. Auto-swaps OKB → USDG internally if needed.
+Execute a policy-gated x402 payment. SpendPolicy.sol is checked onchain before any money moves.
 
 **Auth:** `Authorization: Bearer zpk_...`
 
@@ -172,7 +172,7 @@ Execute a policy-gated x402 payment. SpendPolicy.sol is checked onchain before a
 	"agentAddress": "0x...",
 	"serviceUrl": "https://service.xyz/api",
 	"maxAmount": "0.25",
-	"intent": "Research DeFi trends on X Layer"
+	"intent": "Research DeFi trends on Base"
 }
 ```
 
@@ -183,10 +183,8 @@ Execute a policy-gated x402 payment. SpendPolicy.sol is checked onchain before a
 	"status": "approved",
 	"txHash": "0x...",
 	"amount": "0.10",
-	"currency": "USDG",
+	"currency": "USDC",
 	"merchant": "service.xyz",
-	"swapUsed": false,
-	"okbSpent": null,
 	"remainingDailyBudget": "1.65",
 	"settledAt": "2026-01-01T00:00:00Z"
 }
@@ -219,23 +217,22 @@ Execute a policy-gated x402 payment. SpendPolicy.sol is checked onchain before a
 
 **Block reasons**
 
-| Reason                     | Description                                       |
-| -------------------------- | ------------------------------------------------- |
-| `per_tx_limit_exceeded`    | Amount exceeds per-transaction cap                |
-| `daily_budget_exceeded`    | Agent has hit daily spend limit                   |
-| `merchant_not_allowlisted` | Merchant not in agent's allowlist                 |
-| `insufficient_balance`     | Insufficient USDG and OKB to cover payment + swap |
-| `swap_quote_failed`        | OKX DEX could not produce a valid quote           |
-| `payment_failed`           | x402 verify or settle failed after policy cleared |
+| Reason                     | Description                                |
+| -------------------------- | ------------------------------------------ |
+| `per_tx_limit_exceeded`    | Amount exceeds per-transaction cap         |
+| `daily_budget_exceeded`    | Agent has hit daily spend limit            |
+| `merchant_not_allowlisted` | Merchant not in agent's allowlist          |
+| `insufficient_balance`     | Insufficient USDC to cover payment         |
+| `payment_failed`           | x402 verify or settle failed               |
 
 ---
 
 ### GET|POST /sell/agent-intel
 
-x402-protected seller route for end-to-end buyer/seller settlement on X Layer.
+x402-protected seller route for end-to-end buyer/seller settlement on Base.
 
 - Missing `X-Payment` returns `402 Payment Required` with `Payment-Required` header.
-- Valid `X-Payment` triggers verify + settle via OKX x402, then returns paid resource.
+- Valid `X-Payment` triggers verify + settle via x402, then returns paid resource.
 
 **URL**
 
@@ -246,8 +243,7 @@ https://api.usezenithpay.xyz/sell/agent-intel
 **Notes**
 
 - No Bearer auth required.
-- Demo amount: `0.01 USDG`.
-- Demo payee (merchant): `0xa44fa8ad3e905c8ab525cd0cb14319017f1e04e5`.
+- Demo amount: `0.01 USDC`.
 
 ---
 
@@ -268,9 +264,7 @@ Get current onchain spend policy. Public read — no auth required.
 			"dailyBudget": "3.00",
 			"allowlist": ["exa.ai", "firecrawl.dev"],
 			"approvalThreshold": "0.10",
-			"autoSwapEnabled": true,
-			"swapSlippageTolerance": "0.01",
-			"policyContract": "0x1250e52B7154E12F66e8E347ce116F463D4E248B"
+			"policyContract": "0x..."
 		}
 	]
 }
@@ -293,8 +287,6 @@ Deploy or update the agent's spend policy. Public — authorized via `humanSigna
 	"dailyBudget": "3.00",
 	"allowlist": ["exa.ai", "firecrawl.dev"],
 	"approvalThreshold": "0.10",
-	"autoSwapEnabled": true,
-	"swapSlippageTolerance": "0.01",
 	"humanSignature": "0x...",
 	"timestamp": 1711234567890
 }
@@ -313,15 +305,13 @@ The `humanSignature` must be an EIP-191 personal_sign of:
 ```json
 {
 	"status": "deployed",
-	"policyContract": "0x1250e52B7154E12F66e8E347ce116F463D4E248B",
+	"policyContract": "0x...",
 	"txHash": null,
 	"agentAddress": "0x...",
 	"apiKey": "zpk_...",
 	"perTxLimit": "0.25",
 	"dailyBudget": "3.00",
-	"allowlist": ["exa.ai", "firecrawl.dev"],
-	"autoSwapEnabled": true,
-	"swapSlippageTolerance": "0.01"
+	"allowlist": ["exa.ai", "firecrawl.dev"]
 }
 ```
 
@@ -350,12 +340,10 @@ Full transaction audit trail. Public read — no auth required.
 			"agentAddress": "0x...",
 			"merchant": "exa.ai",
 			"amount": "0.10",
-			"currency": "USDG",
+			"currency": "USDC",
 			"intent": "Research DeFi trends",
 			"status": "approved",
 			"txHash": "0x...",
-			"swapUsed": false,
-			"okbSpent": null,
 			"createdAt": "2026-01-01T00:00:00Z"
 		}
 	],
@@ -397,7 +385,7 @@ List pending payments awaiting human review. Public read — no auth required.
 
 ### POST /approvals/:id/approve
 
-Approve a pending payment. Executes immediately — runs full pay flow (balance check → swap if needed → x402 settle → ledger).
+Approve a pending payment. Executes immediately — runs full pay flow (balance check -> x402 settle -> ledger).
 
 Authorized via `humanSignature` — same EIP-191 pattern as `POST /limits`. No Bearer token needed.
 
@@ -494,8 +482,8 @@ All errors follow this shape:
 
 ## Deployed contracts
 
-| Contract    | Network                        | Address                                      |
-| ----------- | ------------------------------ | -------------------------------------------- |
-| SpendPolicy | X Layer mainnet (chain ID 196) | `0x1250e52B7154E12F66e8E347ce116F463D4E248B` |
+| Contract    | Network                         | Address |
+| ----------- | ------------------------------- | ------- |
+| SpendPolicy | Base mainnet (chain ID 8453)    | TBD     |
 
-USDG on X Layer: `0x4ae46a509f6b1d9056937ba4500cb143933d2dc8`
+USDC on Base: `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`

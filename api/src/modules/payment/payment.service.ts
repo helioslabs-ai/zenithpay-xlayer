@@ -4,33 +4,17 @@ import {
   BASE_USDC,
   BASE_X402_NETWORK,
   base,
-  OKB_NATIVE,
-  XLAYER_CHAIN_ID,
-  XLAYER_USDC,
-  xlayer,
+  baseClient,
 } from "../../config/chains";
 import { SPEND_POLICY_ABI, SPEND_POLICY_ADDRESS } from "../../config/contracts";
 import { getPrivyWalletId } from "../wallet/wallet.service";
 import { payX402 } from "../../providers/privy/x402";
-import * as balanceProvider from "../../providers/onchainos/balance";
-import * as paymentsProvider from "../../providers/onchainos/payments";
-import * as swapProvider from "../../providers/onchainos/swap";
 import { extractHost, unitsToUsdc, usdcToUnits } from "../../utils";
 import * as approvalsService from "../approvals/approvals.service";
 import * as ledgerService from "../ledger/ledger.service";
 import { getLimits } from "../limits/limits.service";
 import type { PaymentRequest, PaymentResult } from "./payment.types";
 import type { BlockReason } from "../../types";
-
-const viemClient = createPublicClient({
-  chain: xlayer,
-  transport: http(),
-});
-
-const baseClient = createPublicClient({
-  chain: base,
-  transport: http(),
-});
 
 const erc20BalanceAbi = [
   {
@@ -44,20 +28,14 @@ const erc20BalanceAbi = [
 
 /**
  * Core payment execution — follows the non-negotiable 6-step flow:
- * 1. SpendPolicy.sol check (on-chain)
+ * 1. SpendPolicy.sol check (on-chain, Base mainnet)
  * 2. USDC balance check
- * 3. OKB auto-swap (conditional)
- * 4. x402 payment (verify + settle)
+ * 3. Approval threshold check (off-chain)
+ * 4. x402 payment via Privy signer
  * 5. Ledger write
  * 6. Return response
  */
 export async function executePayment(
-  request: PaymentRequest,
-): Promise<PaymentResult> {
-  return executeBasePayment(request);
-}
-
-async function executeBasePayment(
   request: PaymentRequest,
 ): Promise<PaymentResult> {
   const { agentAddress, serviceUrl, maxAmount, intent } = request;
@@ -94,6 +72,7 @@ async function executeBasePayment(
     };
   };
 
+  // Step 1: On-chain policy check
   try {
     const [allowed, reason] = (await baseClient.readContract({
       address: SPEND_POLICY_ADDRESS,
@@ -109,7 +88,11 @@ async function executeBasePayment(
     );
   }
 
-  if (policy.approvalThreshold && amountUnits > usdcToUnits(policy.approvalThreshold)) {
+  // Step 3: Approval threshold (off-chain soft gate)
+  if (
+    policy.approvalThreshold &&
+    amountUnits > usdcToUnits(policy.approvalThreshold)
+  ) {
     const approval = await approvalsService.createPendingApproval({
       agentAddress,
       merchant,
@@ -123,10 +106,12 @@ async function executeBasePayment(
       amount: maxAmount,
       merchant,
       intent,
-      message: "Payment exceeds approval threshold. Awaiting human review at GET /approvals.",
+      message:
+        "Payment exceeds approval threshold. Awaiting human review at GET /approvals.",
     };
   }
 
+  // Step 2: USDC balance check
   try {
     const balance = await baseClient.readContract({
       address: BASE_USDC,
@@ -142,6 +127,7 @@ async function executeBasePayment(
     );
   }
 
+  // Step 4: x402 payment via Privy signer
   try {
     const walletId = await getPrivyWalletId(agentAddress);
     const settled = await payX402(
@@ -150,6 +136,8 @@ async function executeBasePayment(
       agentAddress as `0x${string}`,
       maxAmount,
     );
+
+    // Step 5: Ledger write
     await ledgerService.writeTransaction({
       agentAddress,
       merchant,
@@ -163,6 +151,21 @@ async function executeBasePayment(
       asset: settled.asset,
       chainId: BASE_CHAIN_ID,
     });
+
+    // Step 6: Return response
+    let remainingDailyBudget = "0";
+    try {
+      const remaining = await baseClient.readContract({
+        address: SPEND_POLICY_ADDRESS,
+        abi: SPEND_POLICY_ABI,
+        functionName: "getRemainingDailyBudget",
+        args: [agentAddress as `0x${string}`],
+      });
+      remainingDailyBudget = unitsToUsdc(remaining as bigint);
+    } catch {
+      // fallback
+    }
+
     return {
       status: "approved",
       txHash: settled.txHash,
@@ -171,8 +174,7 @@ async function executeBasePayment(
       merchant,
       intent,
       swapUsed: false,
-      okbSpent: null,
-      remainingDailyBudget: "0",
+      remainingDailyBudget,
       settledAt: new Date().toISOString(),
       network: settled.network,
       asset: settled.asset,
@@ -184,322 +186,6 @@ async function executeBasePayment(
       error instanceof Error ? error.message : "Privy x402 payment failed",
     );
   }
-}
-
-async function executeLegacyXLayerPayment(
-  request: PaymentRequest,
-): Promise<PaymentResult> {
-  const { agentAddress, serviceUrl, maxAmount, intent } = request;
-  const merchant = extractHost(serviceUrl);
-  const amountUnits = usdcToUnits(maxAmount);
-
-  // ── STEP 1: SpendPolicy.sol check ──
-  const policy = await getLimits(agentAddress);
-
-  // Merchant is identified by URL in this flow; zero address is the on-chain placeholder.
-  // If merchantAllowlistEnabled=false (default), the contract skips the merchant check.
-  // If enabled, the human must allowlist specific EVM addresses via the dashboard.
-  const ZERO_ADDRESS =
-    "0x0000000000000000000000000000000000000000" as `0x${string}`;
-
-  try {
-    const [allowed, reason] = (await viemClient.readContract({
-      address: SPEND_POLICY_ADDRESS,
-      abi: SPEND_POLICY_ABI,
-      functionName: "checkPayment",
-      args: [agentAddress as `0x${string}`, ZERO_ADDRESS, amountUnits],
-    })) as [boolean, string];
-
-    if (!allowed) {
-      const blockReason = mapOnchainReason(reason);
-
-      await ledgerService.writeTransaction({
-        agentAddress,
-        merchant,
-        amount: maxAmount,
-        currency: "USDG",
-        intent,
-        status: "blocked",
-        reason: blockReason,
-        swapUsed: false,
-      });
-
-      return {
-        status: "blocked",
-        reason: blockReason,
-        amount: maxAmount,
-        merchant,
-        onchainEvent: "PaymentBlocked",
-      };
-    }
-  } catch (error) {
-    // RPC failure — fail closed: block the payment rather than skip the policy check
-    const message =
-      error instanceof Error ? error.message : "Policy check failed";
-    await ledgerService.writeTransaction({
-      agentAddress,
-      merchant,
-      amount: maxAmount,
-      currency: "USDG",
-      intent,
-      status: "blocked",
-      reason: "policy_check_failed",
-      swapUsed: false,
-    });
-    return {
-      status: "blocked",
-      reason: "policy_check_failed",
-      amount: maxAmount,
-      merchant,
-      onchainEvent: "PaymentBlocked",
-      message,
-    };
-  }
-
-  // Check approval threshold (off-chain soft gate)
-  if (policy.approvalThreshold) {
-    const thresholdUnits = usdcToUnits(policy.approvalThreshold);
-    if (amountUnits > thresholdUnits) {
-      const approval = await approvalsService.createPendingApproval({
-        agentAddress,
-        merchant,
-        serviceUrl,
-        amount: maxAmount,
-        intent,
-      });
-
-      return {
-        status: "pending",
-        approvalId: approval.id,
-        amount: maxAmount,
-        merchant,
-        intent,
-        message:
-          "Payment exceeds approval threshold. Awaiting human review at GET /approvals.",
-      };
-    }
-  }
-
-  // ── STEP 2: USDC balance check ──
-  const tokenBalances = await balanceProvider.getTokenBalances(agentAddress, [
-    XLAYER_USDC,
-    OKB_NATIVE,
-  ]);
-
-  let usdcBalance = 0;
-  let okbBalance = 0;
-  for (const tb of tokenBalances) {
-    const addr = (tb.tokenContractAddress ?? "").toLowerCase();
-    if (addr === XLAYER_USDC.toLowerCase()) {
-      usdcBalance = Number.parseFloat(tb.balance);
-    }
-    if (
-      addr === "" ||
-      addr === OKB_NATIVE.toLowerCase() ||
-      tb.symbol === "OKB"
-    ) {
-      okbBalance = Number.parseFloat(tb.balance);
-    }
-  }
-
-  const amountFloat = Number.parseFloat(maxAmount);
-  let swapUsed = false;
-  let okbSpent: string | null = null;
-
-  // ── STEP 3: OKB auto-swap (conditional) ──
-  if (usdcBalance < amountFloat) {
-    const deficit = amountFloat - usdcBalance;
-
-    if (!policy.autoSwapEnabled) {
-      await ledgerService.writeTransaction({
-        agentAddress,
-        merchant,
-        amount: maxAmount,
-        currency: "USDG",
-        intent,
-        status: "blocked",
-        reason: "auto_swap_disabled",
-        swapUsed: false,
-      });
-
-      return {
-        status: "blocked",
-        reason: "auto_swap_disabled",
-        amount: maxAmount,
-        merchant,
-        onchainEvent: "PaymentBlocked",
-      };
-    }
-
-    if (okbBalance <= 0) {
-      await ledgerService.writeTransaction({
-        agentAddress,
-        merchant,
-        amount: maxAmount,
-        currency: "USDG",
-        intent,
-        status: "blocked",
-        reason: "insufficient_balance",
-        swapUsed: false,
-      });
-
-      return {
-        status: "blocked",
-        reason: "insufficient_balance",
-        amount: maxAmount,
-        merchant,
-        onchainEvent: "PaymentBlocked",
-      };
-    }
-
-    try {
-      const quote = await swapProvider.quoteOkbToUsdc(
-        usdcToUnits(deficit.toFixed(6)).toString(),
-        agentAddress,
-      );
-
-      // Check slippage tolerance before executing swap
-      // fromTokenAmount is in wei (18 decimals), okbBalance is in UI units
-      const slippageTolerance = Number.parseFloat(policy.swapSlippageTolerance);
-      const estimatedOkbWei = BigInt(quote.routerResult.fromTokenAmount);
-      const maxOkbWei =
-        estimatedOkbWei +
-        (estimatedOkbWei * BigInt(Math.floor(slippageTolerance * 10000))) /
-          10000n;
-      const maxOkbUi = Number(maxOkbWei) / 1e18;
-
-      if (maxOkbUi > okbBalance) {
-        await ledgerService.writeTransaction({
-          agentAddress,
-          merchant,
-          amount: maxAmount,
-          currency: "USDG",
-          intent,
-          status: "blocked",
-          reason: "swap_slippage_exceeded",
-          swapUsed: false,
-        });
-
-        return {
-          status: "blocked",
-          reason: "swap_slippage_exceeded",
-          amount: maxAmount,
-          merchant,
-          onchainEvent: "PaymentBlocked",
-        };
-      }
-
-      const swapResult = await swapProvider.swapOkbToUsdc(
-        quote.routerResult.fromTokenAmount,
-        agentAddress,
-      );
-
-      swapUsed = true;
-      okbSpent = swapResult.routerResult.fromTokenAmount;
-    } catch {
-      await ledgerService.writeTransaction({
-        agentAddress,
-        merchant,
-        amount: maxAmount,
-        currency: "USDG",
-        intent,
-        status: "blocked",
-        reason: "swap_quote_failed",
-        swapUsed: false,
-      });
-
-      return {
-        status: "blocked",
-        reason: "swap_quote_failed",
-        amount: maxAmount,
-        merchant,
-        onchainEvent: "PaymentBlocked",
-      };
-    }
-  }
-
-  // ── STEP 4: x402 payment ──
-  let txHash: string;
-  let settledNetwork = "eip155:196";
-  let settledAsset: string = XLAYER_USDC;
-  try {
-    await paymentsProvider.verifyX402(serviceUrl, agentAddress, maxAmount);
-    const settleResult = await paymentsProvider.settleX402(
-      serviceUrl,
-      agentAddress,
-      maxAmount,
-      "", // signature handled by OKX Payments API internally
-    );
-    txHash = settleResult.txHash;
-    settledNetwork = settleResult.network ?? "eip155:196";
-    settledAsset = settleResult.asset ?? XLAYER_USDC;
-  } catch {
-    await ledgerService.writeTransaction({
-      agentAddress,
-      merchant,
-      amount: maxAmount,
-      currency: "USDG",
-      intent,
-      status: "blocked",
-      reason: "payment_failed",
-      swapUsed,
-      okbSpent,
-    });
-
-    return {
-      status: "blocked",
-      reason: "payment_failed",
-      amount: maxAmount,
-      merchant,
-      onchainEvent: "PaymentBlocked",
-    };
-  }
-
-  // ── STEP 5: Ledger write ──
-  await ledgerService.writeTransaction({
-    agentAddress,
-    merchant,
-    amount: maxAmount,
-    currency: "USDG",
-    intent,
-    status: "approved",
-    txHash,
-    swapUsed,
-    okbSpent,
-    network: settledNetwork,
-    asset: settledAsset,
-    chainId: XLAYER_CHAIN_ID,
-  });
-
-  // ── STEP 6: Return response ──
-  let remainingDailyBudget = "0";
-  try {
-    const remaining = await viemClient.readContract({
-      address: SPEND_POLICY_ADDRESS,
-      abi: SPEND_POLICY_ABI,
-      functionName: "getRemainingDailyBudget",
-      args: [agentAddress as `0x${string}`],
-    });
-    remainingDailyBudget = unitsToUsdc(remaining as bigint);
-  } catch {
-    // fallback
-  }
-
-  return {
-    status: "approved",
-    txHash,
-    amount: maxAmount,
-    currency: "USDG",
-    merchant,
-    intent,
-    swapUsed,
-    okbSpent,
-    remainingDailyBudget,
-    settledAt: new Date().toISOString(),
-    network: settledNetwork,
-    asset: settledAsset,
-    chainId: XLAYER_CHAIN_ID,
-  };
 }
 
 function mapOnchainReason(

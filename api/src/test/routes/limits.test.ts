@@ -27,9 +27,9 @@ vi.mock("../../modules/limits/limits.service", () => ({
 }));
 
 describe("Limits routes", () => {
-  it("GET /limits without auth → 401", async () => {
+  it("GET /limits without auth → 200 (public route)", async () => {
     const res = await app.request("/limits");
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(200);
   });
 
   it("GET /limits with auth → 200", async () => {
@@ -43,7 +43,7 @@ describe("Limits routes", () => {
     expect(Array.isArray(body.agents)).toBe(true);
   });
 
-  it("POST /limits without auth → 401", async () => {
+  it("POST /limits without auth → 201 (public route, uses humanSignature)", async () => {
     const res = await app.request("/limits", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -54,7 +54,7 @@ describe("Limits routes", () => {
         humanSignature: "0xsig",
       }),
     });
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(201);
   });
 
   it("POST /limits missing humanSignature → 400", async () => {

@@ -8,12 +8,6 @@ export interface ApiResponse<T> {
   status: number;
 }
 
-export interface OkxApiResponse<T> {
-  code: string;
-  msg: string;
-  data: T[];
-}
-
 export type PaymentStatus = "approved" | "blocked" | "pending" | "denied";
 
 export type BlockReason =
@@ -21,9 +15,6 @@ export type BlockReason =
   | "daily_budget_exceeded"
   | "merchant_not_allowlisted"
   | "insufficient_balance"
-  | "auto_swap_disabled"
-  | "swap_slippage_exceeded"
-  | "swap_quote_failed"
   | "payment_failed"
   | "agent_not_active"
   | "policy_check_failed";

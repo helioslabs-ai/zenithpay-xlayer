@@ -1,21 +1,21 @@
 ---
 title: Agent Wallet
-description: TEE-secured agent wallets on X Layer
+description: Privy-managed agent wallets on Base
 ---
 
-ZenithPay's agent wallet is built using OKX Agentic Wallet (TEE).
+ZenithPay's agent wallet is built using Privy managed wallets.
 
-Each agent gets its own wallet address on X Layer, with private keys kept inside the TEE (the server never handles raw keys).
+Each agent gets its own wallet address on Base, with private keys managed server-side by Privy (the ZenithPay API never handles raw keys).
 
-## OKX Agentic Wallet (TEE)
+## Privy Managed Wallets
 
-ZenithPay uses the OKX Agentic Wallet to create a real wallet for each AI agent on X Layer.
+ZenithPay uses Privy to create a real wallet for each AI agent on Base.
 
 The important security property is simple:
-private keys stay inside the TEE. The ZenithPay API never handles raw wallet private keys.
+private keys are managed by Privy's infrastructure. The ZenithPay API never handles raw wallet private keys.
 
 ### Onboarding: `POST /wallet/genesis`
-REST onboarding delegates wallet creation to OKX Agentic Wallet via the agent environment.
+REST onboarding delegates wallet creation to Privy via the agent environment.
 
 Example:
 ```bash

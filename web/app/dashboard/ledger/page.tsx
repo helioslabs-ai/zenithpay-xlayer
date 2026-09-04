@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/table";
 import { getLedger, type LedgerEntry } from "@/lib/api";
 
-const EXPLORER_URL = "https://www.oklink.com/xlayer";
+const EXPLORER_URL = "https://basescan.org";
 const REFRESH_INTERVAL = 15_000;
 
 function formatTime(iso: string): string {
@@ -247,7 +247,7 @@ export default function LedgerPage() {
                   <TableCell className="py-2.5">
                     {tx.swapUsed ? (
                       <span className="border border-dashed px-1.5 py-0.5 text-[10px] text-muted-foreground">
-                        {tx.okbSpent} OKB
+                        {tx.okbSpent} ETH
                       </span>
                     ) : (
                       <span className="text-muted-foreground/30">—</span>

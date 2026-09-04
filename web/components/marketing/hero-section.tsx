@@ -133,7 +133,7 @@ const TERMINAL_LINES: TerminalLine[] = [
 	{ id: "p1", type: "prompt", text: "curl -s https://api.usezenithpay.xyz/skill.md" },
 	{ id: "o1", type: "output", text: "  → ZenithPay loaded · 6 tools ready" },
 	{ id: "g1", type: "gap" },
-	{ id: "c2", type: "comment", text: "// Agent task: Research DeFi yields on X Layer" },
+	{ id: "c2", type: "comment", text: "// Agent task: Research DeFi yields on Base" },
 	{ id: "g2", type: "gap" },
 	{ id: "t1", type: "tool", text: "→ zenithpay_get_limits" },
 	{ id: "o2", type: "output", text: "  $0.25/tx · $3.00/day · $2.75 remaining" },
@@ -142,9 +142,9 @@ const TERMINAL_LINES: TerminalLine[] = [
 	{ id: "o3", type: "output", text: "  stableenrich.dev · safe ✓" },
 	{ id: "g4", type: "gap" },
 	{ id: "t3", type: "tool", text: "→ zenithpay_pay_service" },
-	{ id: "o4", type: "output", text: '  $0.05 · "DeFi research on X Layer"' },
+	{ id: "o4", type: "output", text: '  $0.05 · "DeFi research on Base"' },
 	{ id: "s1", type: "success", text: "✓ Approved · txHash 0x3f2a1b8c…" },
-	{ id: "s2", type: "success", text: "✓ Logged on X Layer · block 9841207" },
+	{ id: "s2", type: "success", text: "✓ Logged on Base · block 9841207" },
 	{ id: "cu", type: "cursor" },
 ]
 

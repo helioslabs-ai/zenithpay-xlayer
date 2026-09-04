@@ -19,7 +19,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
 	title: "ZenithPay — The Spend Governance Layer for AI Agents",
 	description:
-		"ZenithPay gives AI agents a spend governance layer — onchain policy enforcement, gasless x402 payments, and a full audit trail. Built on X Layer.",
+		"ZenithPay gives AI agents a spend governance layer — onchain policy enforcement, x402 payments, and a full audit trail. Built on Base.",
 	icons: [
 		{
 			media: "(prefers-color-scheme: light)",
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
 	openGraph: {
 		title: "ZenithPay — The Spend Governance Layer for AI Agents",
 		description:
-			"ZenithPay gives AI agents a spend governance layer — onchain policy enforcement, gasless x402 payments, and a full audit trail. Built on X Layer.",
+			"ZenithPay gives AI agents a spend governance layer — onchain policy enforcement, x402 payments, and a full audit trail. Built on Base.",
 		siteName: "ZenithPay",
 		images: [
 			{
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
 		card: "summary_large_image",
 		title: "ZenithPay — The Spend Governance Layer for AI Agents",
 		description:
-			"ZenithPay gives AI agents a spend governance layer — onchain policy enforcement, gasless x402 payments, and a full audit trail. Built on X Layer.",
+			"ZenithPay gives AI agents a spend governance layer — onchain policy enforcement, x402 payments, and a full audit trail. Built on Base.",
 		images: ["/og.png"],
 	},
 }

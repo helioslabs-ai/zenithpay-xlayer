@@ -1,16 +1,11 @@
 import { eq } from "drizzle-orm";
-import { createPublicClient, formatUnits, http } from "viem";
-import { BASE_USDC, base } from "../../config/chains";
+import { formatUnits } from "viem";
+import { BASE_USDC, baseClient } from "../../config/chains";
 import { SPEND_POLICY_ABI, SPEND_POLICY_ADDRESS } from "../../config/contracts";
 import { getDb } from "../../db/client";
 import { agents } from "../../db/schema/agents";
 import { unitsToUsdc } from "../../utils";
 import type { AgentBalance } from "./balance.types";
-
-const viemClient = createPublicClient({
-  chain: base,
-  transport: http(),
-});
 
 const erc20BalanceAbi = [
   {
@@ -30,7 +25,7 @@ export async function getBalance(agentAddress: string): Promise<AgentBalance> {
     .where(eq(agents.address, agentAddress));
 
   const usdcBalance = formatUnits(
-    await viemClient.readContract({
+    await baseClient.readContract({
       address: BASE_USDC,
       abi: erc20BalanceAbi,
       functionName: "balanceOf",
@@ -39,9 +34,16 @@ export async function getBalance(agentAddress: string): Promise<AgentBalance> {
     6,
   );
 
+  const ethBalance = formatUnits(
+    await baseClient.getBalance({
+      address: agentAddress as `0x${string}`,
+    }),
+    18,
+  );
+
   let remainingDailyBudget = "0";
   try {
-    const remaining = await viemClient.readContract({
+    const remaining = await baseClient.readContract({
       address: SPEND_POLICY_ADDRESS,
       abi: SPEND_POLICY_ABI,
       functionName: "getRemainingDailyBudget",
@@ -55,7 +57,7 @@ export async function getBalance(agentAddress: string): Promise<AgentBalance> {
   return {
     address: agentAddress,
     label: agent?.label ?? null,
-    balances: { USDG: usdcBalance, OKB: "0" },
+    balances: { USDC: usdcBalance, ETH: ethBalance },
     remainingDailyBudget,
   };
 }

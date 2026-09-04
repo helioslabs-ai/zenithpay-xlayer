@@ -127,8 +127,8 @@ const CODE: Record<Tab, React.ReactNode> = {
 			<div className="mt-4 border-t border-black/8 dark:border-white/8 pt-3">
 				<Cm>{"// 6 tools exposed to your agent:"}</Cm>
 				<div className="mt-1">
-					<Acc>zenithpay_balance</Acc>
-					<Cm>{"        · USDG + OKB + remaining budget"}</Cm>
+				<Acc>zenithpay_balance</Acc>
+				<Cm>{"        · USDC + ETH + remaining budget"}</Cm>
 				</div>
 				<div>
 					<Acc>zenithpay_pay_service</Acc>
@@ -143,8 +143,8 @@ const CODE: Record<Tab, React.ReactNode> = {
 					<Cm>{"    · set per-tx cap + daily budget"}</Cm>
 				</div>
 				<div>
-					<Acc>zenithpay_verify_merchant</Acc>
-					<Cm>{"· OKX security scan + allowlist"}</Cm>
+				<Acc>zenithpay_verify_merchant</Acc>
+				<Cm>{"· security scan + allowlist"}</Cm>
 				</div>
 				<div>
 					<Acc>zenithpay_ledger</Acc>
@@ -207,8 +207,8 @@ const CODE: Record<Tab, React.ReactNode> = {
 				<Dim>,</Dim>
 			</div>
 			<div className="pl-12">
-				<Dim>intent: </Dim>
-				<Str>"Research DeFi trends on X Layer"</Str>
+			<Dim>intent: </Dim>
+			<Str>"Research DeFi trends on Base"</Str>
 				<Dim>,</Dim>
 			</div>
 			<div className="pl-8">
@@ -225,7 +225,7 @@ const CODE: Record<Tab, React.ReactNode> = {
 				<div>
 					<Cm>{"// 200 "}</Cm>
 					<Acc>approved</Acc>
-					<Dim>{"  · txHash on X Layer"}</Dim>
+					<Dim>{"  · txHash on Base"}</Dim>
 				</div>
 				<div>
 					<Cm>{"// 202 "}</Cm>
@@ -251,7 +251,7 @@ const TAB_DESCRIPTIONS: Record<Tab, string> = {
 		"One curl command in your terminal. The agent reads SKILL.md, follows the onboarding steps automatically — creates a TEE wallet, guides policy activation onchain, then pays with full enforcement.",
 	MCP: "Register ZenithPay as an MCP server. Your agent gets 6 tools — balance check, policy-gated x402 payment, spend limit read/write, merchant verification, and full audit trail.",
 	"REST API":
-		"Call ZenithPay directly over HTTP. Every payment request hits the onchain SpendPolicy contract before any funds move. Responses include txHash on X Layer.",
+		"Call ZenithPay directly over HTTP. Every payment request hits the onchain SpendPolicy contract before any funds move. Responses include txHash on Base.",
 }
 
 export function IntegrationsSection() {

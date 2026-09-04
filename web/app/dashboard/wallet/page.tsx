@@ -2,7 +2,7 @@
 
 import { Copy, ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useConnection } from "wagmi";
+import { useAccount } from "wagmi";
 import { useAgent } from "@/components/dashboard/agent-context";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,14 +10,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { type BalanceResult, getBalance } from "@/lib/api";
 
-const EXPLORER_URL = "https://www.oklink.com/xlayer";
+const EXPLORER_URL = "https://basescan.org";
 
 function shortenAddress(addr: string): string {
   return `${addr.slice(0, 8)}...${addr.slice(-6)}`;
 }
 
 export default function WalletPage() {
-  const { address } = useConnection();
+  const { address } = useAccount();
   const { agentAddress: AGENT_ADDRESS, hasAgent } = useAgent();
   const [balance, setBalance] = useState<BalanceResult | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,7 +51,7 @@ export default function WalletPage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Wallet</h1>
         <p className="text-sm text-muted-foreground">
-          Agent wallet details and balances on X Layer
+          Agent wallet details and balances on Base
         </p>
       </div>
 
@@ -98,7 +98,7 @@ export default function WalletPage() {
               <span className="text-xs text-muted-foreground uppercase tracking-wider">
                 Network
               </span>
-              <span className="text-xs font-mono">X Layer (196)</span>
+              <span className="text-xs font-mono">Base (8453)</span>
             </div>
 
             <div className="flex items-center justify-between border-b border-dashed py-3">
@@ -109,7 +109,7 @@ export default function WalletPage() {
                 variant="outline"
                 className="rounded-none text-xs font-mono"
               >
-                OKX TEE Wallet
+                Smart Account
               </Badge>
             </div>
 
@@ -123,7 +123,7 @@ export default function WalletPage() {
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground underline underline-offset-4"
               >
-                View on OKLink
+                View on BaseScan
                 <ExternalLink className="size-3" />
               </a>
             </div>
@@ -146,9 +146,9 @@ export default function WalletPage() {
               <>
                 <div className="flex items-center justify-between border p-3">
                   <div>
-                    <p className="text-sm font-medium">USDG</p>
+                    <p className="text-sm font-medium">USDC</p>
                     <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                      OKX Stablecoin
+                      USD Coin
                     </p>
                   </div>
                   <p className="text-lg font-bold font-mono">
@@ -158,13 +158,13 @@ export default function WalletPage() {
 
                 <div className="flex items-center justify-between border p-3">
                   <div>
-                    <p className="text-sm font-medium">OKB</p>
+                    <p className="text-sm font-medium">ETH</p>
                     <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
                       Native gas token
                     </p>
                   </div>
                   <p className="text-lg font-bold font-mono">
-                    {balance?.okbBalance ?? "0.00"} OKB
+                    {balance?.ethBalance ?? "0.00"} ETH
                   </p>
                 </div>
 

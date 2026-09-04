@@ -2,8 +2,8 @@ export interface AgentBalance {
   address: string;
   label: string | null;
   balances: {
-    USDG: string;
-    OKB: string;
+    USDC: string;
+    ETH: string;
   };
   remainingDailyBudget: string;
 }

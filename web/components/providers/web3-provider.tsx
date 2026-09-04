@@ -1,37 +1,29 @@
 "use client";
 
+import { PrivyProvider } from "@privy-io/react-auth";
+import { createConfig, WagmiProvider } from "@privy-io/wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
-import { defineChain } from "viem";
-import { createConfig, http, injected, WagmiProvider } from "wagmi";
+import { base } from "viem/chains";
+import {
+  createConfig as createPlainWagmiConfig,
+  http,
+  WagmiProvider as PlainWagmiProvider,
+} from "wagmi";
 
-const xlayer = defineChain({
-  id: 196,
-  name: "X Layer",
-  nativeCurrency: { name: "OKB", symbol: "OKB", decimals: 18 },
-  rpcUrls: {
-    default: { http: ["https://rpc.xlayer.tech"] },
-    fallback: { http: ["https://xlayerrpc.okx.com"] },
-  },
-  blockExplorers: {
-    default: { name: "OKLink", url: "https://www.oklink.com/xlayer" },
+/** Wagmi without Privy connector — only when `NEXT_PUBLIC_PRIVY_APP_ID` is unset. */
+const plainWagmiConfig = createPlainWagmiConfig({
+  chains: [base],
+  transports: {
+    [base.id]: http(),
   },
 });
 
-const wagmiConfig = createConfig({
-  chains: [xlayer],
-  connectors: [
-    injected({
-      target: {
-        id: "okx",
-        name: "OKX Wallet",
-        provider: () =>
-          typeof window !== "undefined" ? window.okxwallet : undefined,
-      },
-    }),
-  ],
+/** Wagmi + Privy embedded wallet connector (onboarding, dashboard, `useConnection`, etc.). */
+const privyWagmiConfig = createConfig({
+  chains: [base],
   transports: {
-    [xlayer.id]: http(),
+    [base.id]: http(),
   },
 });
 
@@ -42,9 +34,37 @@ interface Web3ProviderProps {
 }
 
 export function Web3Provider({ children }: Web3ProviderProps) {
+  const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID;
+
+  if (!appId) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <PlainWagmiProvider config={plainWagmiConfig}>
+          {children}
+        </PlainWagmiProvider>
+      </QueryClientProvider>
+    );
+  }
+
   return (
-    <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    </WagmiProvider>
+    <PrivyProvider
+      appId={appId}
+      config={{
+        loginMethods: ["email"],
+        appearance: {
+          theme: "dark",
+          accentColor: "#ffffff",
+        },
+        embeddedWallets: {
+          ethereum: { createOnLogin: "users-without-wallets" },
+        },
+        defaultChain: base,
+        supportedChains: [base],
+      }}
+    >
+      <QueryClientProvider client={queryClient}>
+        <WagmiProvider config={privyWagmiConfig}>{children}</WagmiProvider>
+      </QueryClientProvider>
+    </PrivyProvider>
   );
 }

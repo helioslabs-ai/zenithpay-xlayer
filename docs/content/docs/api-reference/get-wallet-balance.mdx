@@ -1,6 +1,6 @@
 ---
 title: GET /wallet/balance
-description: Get USDG/OKB balances and remaining budget per linked agent
+description: Get USDC/ETH balances and remaining budget per linked agent
 ---
 
 ## Endpoint
@@ -25,12 +25,12 @@ Bearer API key required.
   "agents": [
     {
       "agentAddress": "0x...",
-      "usdcBalance": "12.50",
-      "okbBalance": "0.80",
+			"usdcBalance": "12.50",
+			"ethBalance": "0.01",
       "remainingDailyBudget": "1.75"
     }
   ]
 }
 ```
 
-Note: field name `usdcBalance` is a legacy key and currently represents settlement stable balance (USDG in production narrative).
+Settlement token is USDC on Base (`0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`).

@@ -17,7 +17,7 @@ x402 payment flow via `X-Payment` header (no Bearer key).
 ## Behavior
 
 1. **No `X-Payment` header** -> `402 Payment Required` with `Payment-Required` header payload.
-2. **With `X-Payment` header** -> verify and settle through OKX x402, then return paid resource payload.
+2. **With `X-Payment` header** -> verify and settle through x402 on Base, then return paid resource payload.
 
 ## Challenge response (402)
 
@@ -34,9 +34,9 @@ Headers include:
 ```json
 {
   "agent": {
-    "address": "0x726Cf0C4Fe559DB9A32396161694C7b88C60C947",
-    "network": "X Layer",
-    "chainId": 196
+    "address": "0x...",
+    "network": "Base",
+    "chainId": 8453
   },
   "portfolio": {
     "totalValueUsd": "123.45",
@@ -45,11 +45,11 @@ Headers include:
   "payment": {
     "status": "settled",
     "txHash": "0x...",
-    "network": "X Layer",
-    "token": "USDG",
+    "network": "Base",
+    "token": "USDC",
     "amount": "0.01",
     "payer": "0x...",
-    "explorer": "https://www.oklink.com/xlayer/tx/0x..."
+    "explorer": "https://basescan.org/tx/0x..."
   }
 }
 ```

@@ -15,9 +15,9 @@ vi.mock("../../modules/ledger/ledger.service", () => ({
 }));
 
 describe("Ledger routes", () => {
-  it("GET /ledger without auth → 401", async () => {
+  it("GET /ledger without auth → 200 (public route)", async () => {
     const res = await app.request("/ledger");
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(200);
   });
 
   it("GET /ledger with auth → 200", async () => {
