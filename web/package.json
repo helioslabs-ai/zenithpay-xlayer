@@ -11,6 +11,8 @@
     "check": "biome check --write ."
   },
   "dependencies": {
+    "@privy-io/react-auth": "^3.40.0",
+    "@privy-io/wagmi": "^4.0.17",
     "@react-three/fiber": "^9.5.0",
     "@react-three/postprocessing": "^3.0.4",
     "@tanstack/react-query": "^5.90.21",

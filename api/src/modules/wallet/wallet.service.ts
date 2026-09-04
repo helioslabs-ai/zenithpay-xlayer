@@ -25,7 +25,7 @@ export async function createGenesisWallet(
   if (ownedAgent) {
     if (!ownedAgent.privyWalletId) {
       throw new Error(
-        "Agent belongs to the legacy OKX wallet system and must be recreated on Base",
+        "Agent belongs to a legacy wallet system and must be recreated on Base",
       );
     }
     return {

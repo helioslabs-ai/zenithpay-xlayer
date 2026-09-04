@@ -11,7 +11,7 @@ import {
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { formatUnits } from "viem";
-import { useConnection, useReadContract } from "wagmi";
+import { useAccount, useReadContract } from "wagmi";
 import { useAgent } from "@/components/dashboard/agent-context";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -42,7 +42,7 @@ const DEMO_AGENT_ADDRESS = "0x726cf0c4fe559db9a32396161694c7b88c60c947";
 const DEMO_BALANCE: BalanceResult = {
   agentAddress: DEMO_AGENT_ADDRESS,
   usdcBalance: "0.984637",
-  okbBalance: "0.012",
+  ethBalance: "0.012",
   remainingDailyBudget: "9.99",
 };
 
@@ -58,7 +58,7 @@ const DEMO_POLICY: AgentPolicy = {
 };
 
 const DEMO_TRANSACTIONS: LedgerEntry[] = [
-  { id: "d1", agentAddress: DEMO_AGENT_ADDRESS, merchant: "api.usezenithpay.xyz", amount: "0.01", currency: "USDC", intent: "DeFi research on X Layer", status: "approved", reason: null, txHash: "0x3f2a1b8c...", swapUsed: false, okbSpent: null, createdAt: new Date(Date.now() - 1000 * 60 * 5).toISOString() },
+  { id: "d1", agentAddress: DEMO_AGENT_ADDRESS, merchant: "api.usezenithpay.xyz", amount: "0.01", currency: "USDC", intent: "DeFi research on Base", status: "approved", reason: null, txHash: "0x3f2a1b8c...", swapUsed: false, okbSpent: null, createdAt: new Date(Date.now() - 1000 * 60 * 5).toISOString() },
   { id: "d2", agentAddress: DEMO_AGENT_ADDRESS, merchant: "api.usezenithpay.xyz", amount: "0.01", currency: "USDC", intent: "Token price lookup", status: "approved", reason: null, txHash: "0x7a4c2d1e...", swapUsed: false, okbSpent: null, createdAt: new Date(Date.now() - 1000 * 60 * 12).toISOString() },
   { id: "d3", agentAddress: DEMO_AGENT_ADDRESS, merchant: "api.usezenithpay.xyz", amount: "0.01", currency: "USDC", intent: "On-chain data fetch", status: "approved", reason: null, txHash: "0x9b3e5f2a...", swapUsed: false, okbSpent: null, createdAt: new Date(Date.now() - 1000 * 60 * 25).toISOString() },
   { id: "d4", agentAddress: DEMO_AGENT_ADDRESS, merchant: "api.usezenithpay.xyz", amount: "0.01", currency: "USDC", intent: "Exceeds per-tx limit", status: "blocked", reason: "per_tx_limit", txHash: null, swapUsed: false, okbSpent: null, createdAt: new Date(Date.now() - 1000 * 60 * 40).toISOString() },
@@ -71,7 +71,7 @@ const DEMO_TRANSACTIONS: LedgerEntry[] = [
 ];
 
 export default function DashboardPage() {
-  const { address } = useConnection();
+  const { address } = useAccount();
   const { agentAddress: AGENT_ADDRESS, hasAgent, isDemo } = useAgent();
   const [balance, setBalance] = useState<BalanceResult | null>(null);
   const [policies, setPolicies] = useState<AgentPolicy[]>([]);
@@ -168,7 +168,7 @@ export default function DashboardPage() {
         <Card className="rounded-none border">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
-              USDG Balance
+              USDC Balance
             </CardTitle>
             <Shield className="size-4 text-muted-foreground" />
           </CardHeader>
@@ -269,7 +269,7 @@ export default function DashboardPage() {
             <div className="space-y-0">
               <div className="flex items-center justify-between border-b border-dashed py-2.5">
                 <span className="text-xs text-muted-foreground uppercase tracking-wider">
-                  USDG
+                  USDC
                 </span>
                 {initialLoading ? (
                   <Skeleton className="h-4 w-20 rounded-none" />
@@ -281,13 +281,13 @@ export default function DashboardPage() {
               </div>
               <div className="flex items-center justify-between border-b border-dashed py-2.5">
                 <span className="text-xs text-muted-foreground uppercase tracking-wider">
-                  OKB
+                  ETH
                 </span>
                 {initialLoading ? (
                   <Skeleton className="h-4 w-16 rounded-none" />
                 ) : (
                   <span className="text-sm font-mono">
-                    {balance?.okbBalance ?? "0.00"} OKB
+                    {balance?.ethBalance ?? "0.00"} ETH
                   </span>
                 )}
               </div>
@@ -295,7 +295,7 @@ export default function DashboardPage() {
                 <span className="text-xs text-muted-foreground uppercase tracking-wider">
                   Network
                 </span>
-                <span className="text-xs font-mono">X Layer (196)</span>
+                <span className="text-xs font-mono">Base (8453)</span>
               </div>
             </div>
 
@@ -306,7 +306,7 @@ export default function DashboardPage() {
                   Agent address
                 </span>
                 <a
-                  href={`https://www.oklink.com/xlayer/address/${AGENT_ADDRESS}`}
+                  href={`https://basescan.org/address/${AGENT_ADDRESS}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-[10px] text-muted-foreground hover:text-foreground"
@@ -335,7 +335,7 @@ export default function DashboardPage() {
             </button>
 
             <p className="text-[10px] text-muted-foreground text-center">
-              Send USDG or OKB to the address above on X Layer
+              Send USDC or ETH to the address above on Base
             </p>
           </CardContent>
         </Card>

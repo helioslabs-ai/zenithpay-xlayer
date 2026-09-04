@@ -9,7 +9,7 @@ import "@openzeppelin/contracts/utils/Pausable.sol";
 /**
  * @title  SpendPolicy
  * @author ZenithPay
- * @notice On-chain spend enforcement for AI agents on X Layer.
+ * @notice On-chain spend enforcement for AI agents on Base.
  *
  * Architecture
  * ─────────────
@@ -70,7 +70,7 @@ contract SpendPolicy is ReentrancyGuard, Pausable {
     /// @notice Pending new protocol owner (two-step transfer)
     address public pendingProtocolOwner;
 
-    /// @notice USDC token on X Layer
+    /// @notice USDC token on Base
     IERC20 public immutable usdc;
 
     /// @notice agent address → policy
@@ -178,8 +178,8 @@ contract SpendPolicy is ReentrancyGuard, Pausable {
     // Constructor
     // ─────────────────────────────────────────────────────────
 
-    /// @param _usdc  USDG token address on X Layer — OKX x402 supported token (eip155:196)
-    ///               USDG contract: 0x4ae46a509f6b1d9056937ba4500cb143933d2dc8 (6 decimals)
+    /// @param _usdc  USDC token address on Base (eip155:8453)
+    ///               USDC contract: 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913 (6 decimals)
     constructor(address _usdc) {
         if (_usdc == address(0)) revert ZeroAddress();
         protocolOwner = msg.sender;
@@ -347,7 +347,7 @@ contract SpendPolicy is ReentrancyGuard, Pausable {
      * @notice Execute a policy-gated payment. Called by the agent directly.
      *         This is the core enforcement function — if it reverts, no money moves.
      *
-     * @param merchant    Address receiving USDC (x402 service wallet on X Layer)
+     * @param merchant    Address receiving USDC (x402 service wallet on Base)
      * @param amount      USDC amount (6 decimals)
      * @param intentHash  keccak256(abi.encodePacked(intent string)) — logged for audit trail
      *

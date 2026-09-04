@@ -15,7 +15,6 @@ export interface PaymentApproved {
   merchant: string;
   intent: string;
   swapUsed: boolean;
-  okbSpent: string | null;
   remainingDailyBudget: string;
   settledAt: string;
   asset?: string;

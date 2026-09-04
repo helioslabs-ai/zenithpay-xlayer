@@ -4,7 +4,7 @@ import { ExternalLink, Loader2, Shield } from "lucide-react";
 import { useEffect, useState } from "react";
 import { formatUnits } from "viem";
 import {
-  useConnection,
+  useAccount,
   useReadContract,
   useSignMessage,
   useWaitForTransactionReceipt,
@@ -24,7 +24,7 @@ import {
   SPEND_POLICY_ABI,
   SPEND_POLICY_ADDRESS,
   usdcToUnits,
-  XLAYER_EXPLORER,
+  BASE_EXPLORER,
 } from "@/lib/contracts";
 
 const PRESETS = [
@@ -34,7 +34,7 @@ const PRESETS = [
 ];
 
 export default function LimitsPage() {
-  const { address } = useConnection();
+  const { address } = useAccount();
   const { agentAddress: AGENT_ADDRESS, hasAgent } = useAgent();
   const { signMessageAsync } = useSignMessage();
   const { writeContractAsync } = useWriteContract();
@@ -278,7 +278,7 @@ export default function LimitsPage() {
                     htmlFor="perTxLimit"
                     className="text-xs uppercase tracking-wider"
                   >
-                    Per-Transaction Limit (USDG)
+                    Per-Transaction Limit (USDC)
                   </Label>
                   <Input
                     id="perTxLimit"
@@ -297,7 +297,7 @@ export default function LimitsPage() {
                     htmlFor="dailyBudget"
                     className="text-xs uppercase tracking-wider"
                   >
-                    Daily Budget (USDG)
+                    Daily Budget (USDC)
                   </Label>
                   <Input
                     id="dailyBudget"
@@ -316,7 +316,7 @@ export default function LimitsPage() {
                     htmlFor="approvalThreshold"
                     className="text-xs uppercase tracking-wider"
                   >
-                    Approval Threshold (USDG)
+                    Approval Threshold (USDC)
                   </Label>
                   <Input
                     id="approvalThreshold"
@@ -360,9 +360,9 @@ export default function LimitsPage() {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium">OKB → USDG Auto-Swap</p>
+                    <p className="text-sm font-medium">ETH → USDC Auto-Swap</p>
                     <p className="text-[10px] text-muted-foreground mt-0.5">
-                      Swap OKB when USDG balance is insufficient
+                      Swap ETH when USDC balance is insufficient
                     </p>
                   </div>
                   <Switch
@@ -450,7 +450,7 @@ export default function LimitsPage() {
                         Contract
                       </span>
                       <a
-                        href={`${XLAYER_EXPLORER}/address/${displayContract}`}
+                        href={`${BASE_EXPLORER}/address/${displayContract}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1 font-mono hover:text-foreground text-muted-foreground underline underline-offset-4"
@@ -472,7 +472,7 @@ export default function LimitsPage() {
 
             {txHash && (
               <a
-                href={`${XLAYER_EXPLORER}/tx/${txHash}`}
+                href={`${BASE_EXPLORER}/tx/${txHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 border border-dashed p-3 text-xs text-muted-foreground hover:text-foreground transition-colors"
@@ -524,8 +524,8 @@ export default function LimitsPage() {
             </Button>
             <p className="text-[10px] text-muted-foreground text-center">
               {isRegistered
-                ? "Calls SpendPolicy.updatePolicy() on X Layer"
-                : "Calls SpendPolicy.registerAgent() on X Layer"}
+                ? "Calls SpendPolicy.updatePolicy() on Base"
+                : "Calls SpendPolicy.registerAgent() on Base"}
             </p>
           </div>
         </div>

@@ -11,7 +11,7 @@ import {
 import { useEffect, useState } from "react";
 import { formatUnits } from "viem";
 import {
-  useConnection,
+  useAccount,
   useReadContract,
   useSignMessage,
   useWaitForTransactionReceipt,
@@ -30,12 +30,12 @@ import {
   AgentStatus,
   SPEND_POLICY_ABI,
   SPEND_POLICY_ADDRESS,
-  XLAYER_EXPLORER,
+  BASE_EXPLORER,
 } from "@/lib/contracts";
 import { cn } from "@/lib/utils";
 
 export default function SettingsPage() {
-  const { address } = useConnection();
+  const { address } = useAccount();
   const { agentAddress: AGENT_ADDRESS, agentDisplayName, hasAgent } = useAgent();
   const { signMessageAsync } = useSignMessage();
   const { writeContractAsync } = useWriteContract();
@@ -295,7 +295,7 @@ export default function SettingsPage() {
               variant="outline"
               className="rounded-none text-[10px] font-mono"
             >
-              OKX TEE · X Layer 196
+              Base · 8453
             </Badge>
           </div>
         </div>
@@ -333,7 +333,7 @@ export default function SettingsPage() {
                     {displayDaily ? `$${displayDaily}/day` : "—/day"}
                   </span>
                   <a
-                    href={`${XLAYER_EXPLORER}/address/${policy?.policyContract ?? SPEND_POLICY_ADDRESS}`}
+                    href={`${BASE_EXPLORER}/address/${policy?.policyContract ?? SPEND_POLICY_ADDRESS}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-1 text-[10px] font-mono text-muted-foreground hover:text-foreground"
@@ -376,15 +376,15 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="border border-dashed p-3 text-xs text-muted-foreground">
-            Auto-swap exchanges OKB for USDG when the agent wallet has
-            insufficient USDG. Only the exact amount needed is swapped.
+            Auto-swap exchanges ETH for USDC when the agent wallet has
+            insufficient USDC. Only the exact amount needed is swapped.
           </div>
 
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium">Auto-Swap OKB → USDG</p>
+              <p className="text-sm font-medium">Auto-Swap ETH → USDC</p>
               <p className="text-[10px] text-muted-foreground mt-0.5">
-                Automatically acquire USDG before payments
+                Automatically acquire USDC before payments
               </p>
             </div>
             <Switch
@@ -409,7 +409,7 @@ export default function SettingsPage() {
               disabled={!autoSwapEnabled}
             />
             <p className="text-[10px] text-muted-foreground">
-              e.g. 0.01 = 1% max slippage on OKB→USDG swaps
+              e.g. 0.01 = 1% max slippage on ETH→USDC swaps
             </p>
           </div>
 
@@ -540,7 +540,7 @@ export default function SettingsPage() {
         <CardContent className="space-y-3">
           {dangerTxHash && (
             <a
-              href={`${XLAYER_EXPLORER}/tx/${dangerTxHash}`}
+              href={`${BASE_EXPLORER}/tx/${dangerTxHash}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 border border-dashed p-3 text-xs text-muted-foreground hover:text-foreground transition-colors"

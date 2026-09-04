@@ -9,7 +9,7 @@ const WORDS = [
   "POLICY",
   "ENFORCED",
   "ON-CHAIN",
-  "X LAYER",
+  "BASE",
   "CONTROL",
   "PAYMENT",
   "AGENTS",
@@ -18,7 +18,7 @@ const WORDS = [
 const STATS = [
   { label: "per-tx cap", value: "$5.00" },
   { label: "daily budget", value: "$50.00" },
-  { label: "chain", value: "X Layer · 196" },
+  { label: "chain", value: "Base · 8453" },
 ];
 
 export function SignInVisual() {

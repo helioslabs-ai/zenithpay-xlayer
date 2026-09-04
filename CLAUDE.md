@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-You are **Zenith** — an AI agent collaborating to build **ZenithPay** for the **X Layer OnchainOS AI Hackathon**. This is your entrypoint. Read it first, every session.
+You are **Zenith** — an AI agent collaborating to build **ZenithPay**, a spend governance layer for AI agents on Base. This is your entrypoint. Read it first, every session.
 
 ---
 
@@ -15,8 +15,7 @@ You are **Zenith** — an AI agent collaborating to build **ZenithPay** for the 
 5. Read `.context/API-SPEC.md` — routes, modules, providers, auto-swap flow, approvals
 6. Read `.context/INTEGRATION.md` — full REST + MCP + Skill reference with request/response examples
 7. Read `.context/FILE-STRUCTURE.md` — canonical file structure for all packages
-8. Read `.context/llms.txt` — OKX OnchainOS API docs for LLM context
-9. Tell the staff engineer: what you will build this session, and any blockers
+8. Tell the staff engineer: what you will build this session, and any blockers
 
 ### End of session
 
@@ -39,7 +38,7 @@ You are **Zenith** — an AI agent collaborating to build **ZenithPay** for the 
 
 | Layer        | Status                                | Notes                                                                          |
 | ------------ | ------------------------------------- | ------------------------------------------------------------------------------ |
-| `web/`       | In progress                           | Landing page done. OKX wallet provider + wagmi v3 done. Needs dashboard pages. |
+| `web/`       | In progress                           | Landing page done. Privy + wagmi v3 done. Needs dashboard pages.       |
 | `api/`       | Scaffolded                            | Folder structure created. Implementation not started.                          |
 | `contracts/` | blocked (pending contract deployment) | Needs SpendPolicy.sol + Foundry setup                                          |
 | `skills/`    | Scaffolded                            | Needs `spend-agent/SKILL.md` + `references/api_docs.md`                        |
@@ -64,7 +63,7 @@ bun dev          # dev server :3001
 forge build
 forge test
 forge test --match-test <TestName>
-forge script script/Deploy.s.sol --rpc-url $XLAYER_RPC_URL --broadcast
+forge script script/Deploy.s.sol --rpc-url $BASE_RPC_URL --broadcast
 ```
 
 ---
@@ -83,14 +82,14 @@ Full file structure with every file documented → `.context/FILE-STRUCTURE.md`
 | `.context/API-SPEC.md`               | Routes · modules · providers · auto-swap flow · approvals          |
 | `.context/INTEGRATION.md`            | Full REST API + MCP + Skill reference with auth, examples, schemas |
 | `.context/FILE-STRUCTURE.md`         | Canonical file structure for every package + monorepo root         |
-| `.context/llms.txt`                  | OKX OnchainOS API docs for LLM context                             |
+| `.context/llms.txt`                  | API docs for LLM context                                           |
 | `.context/OnchainOS-AI-hackathon.md` | Hackathon requirements and judging criteria                        |
 | `README.md`                          | Public-facing overview for judges + builders                       |
 
 ### Monorepo structure (compact — full detail in `.context/FILE-STRUCTURE.md`)
 
 ```
-zenithpay-xlayer/
+zenithpay-buildx/
 ├── web/                    # Next.js 16 — marketing + dashboard
 │   ├── app/
 │   │   ├── (marketing)/    # landing, pricing, about
@@ -114,8 +113,7 @@ zenithpay-xlayer/
 │       ├── db/             # client.ts + schema/ (agents, policies, ledger, approvals)
 │       ├── modules/        # wallet/ balance/ payment/ limits/ ledger/ approvals/
 │       ├── providers/
-│       │   └── onchainos/  # agentic-wallet, balance, gateway, swap,
-│       │                   # payments, history, market, token
+│       │   └── privy/      # wallet, balance, payments
 │       ├── routes/         # wallet.ts pay.ts limits.ts ledger.ts approvals.ts
 │       ├── mcp/
 │       │   ├── server.ts   # McpServer instance
@@ -123,7 +121,7 @@ zenithpay-xlayer/
 │       │                   # verify-merchant ledger
 │       └── middleware/     # auth.ts logger.ts rate-limit.ts
 │
-├── contracts/              # Foundry — SpendPolicy.sol on X Layer (chain ID 196)
+├── contracts/              # Foundry — SpendPolicy.sol on Base (chain ID 8453)
 │   ├── src/SpendPolicy.sol
 │   ├── test/SpendPolicy.t.sol
 │   ├── script/Deploy.s.sol
@@ -153,17 +151,14 @@ Agent → POST /pay (serviceUrl, maxAmount, intent)
   → STEP 1: SpendPolicy.sol check — per-tx limit, daily budget, allowlist
       → BLOCKED: PaymentBlocked event, return { status: "blocked" }
       → ABOVE approvalThreshold: create pending record, return { status: "pending", approvalId }
-  → STEP 2: USDC balance check
-      → sufficient: go to STEP 4
-      → insufficient: go to STEP 3
-  → STEP 3: OKB auto-swap (conditional, exact amount only)
-      → swap_quote → swap_approve → swap_swap
-      → failure: return { status: "blocked", reason: "insufficient_balance" }
-  → STEP 4: x402 payment
-      → POST /api/v6/x402/verify
-      → POST /api/v6/x402/settle (zero gas on X Layer)
-  → STEP 5: ledger write (amount, intent, status, swapUsed, okbSpent)
-  → STEP 6: return { status: "approved", txHash, swapUsed, remainingDailyBudget }
+  → STEP 2: USDC balance check (viem readContract on Base)
+      → sufficient: go to STEP 3
+      → insufficient: return { status: "blocked", reason: "insufficient_balance" }
+  → STEP 3: x402 payment
+      → Privy server wallet signs x402 payment
+      → x402 payment sent to service endpoint on Base
+  → STEP 4: ledger write (amount, intent, status)
+  → STEP 5: return { status: "approved", txHash, remainingDailyBudget }
 ```
 
 **Critical:** Policy check is always STEP 1. Swap never happens before policy is cleared.
@@ -193,28 +188,18 @@ Hard limits (perTxLimit, dailyBudget, allowlist) are enforced on-chain in the co
 
 ```typescript
 // config/chains.ts
-export const xlayer = defineChain({
-	id: 196,
-	name: "X Layer",
-	nativeCurrency: { name: "OKB", symbol: "OKB", decimals: 18 },
-	rpcUrls: {
-		default: { http: ["https://rpc.xlayer.tech"] },
-		fallback: { http: ["https://xlayerrpc.okx.com"] },
-	},
-	blockExplorers: {
-		default: { name: "OKLink", url: "https://www.oklink.com/xlayer" },
-	},
-})
+import { base } from "viem/chains"
 
-export const XLAYER_USDC = "0x74b7f16337b8972027f6196a17a631ac6de26d22"
-// OKB native: 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+// Base mainnet (chainId: 8453) — used directly from viem/chains
+export const BASE_USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+// ETH native: 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 ```
 
 ### Import direction — never violate
 
 ```
-routes/     → modules/  → providers/  → OKX APIs
-mcp/tools/  → modules/  → providers/  → OKX APIs
+routes/     → modules/  → providers/  → Base RPCs / Privy API
+mcp/tools/  → modules/  → providers/  → Base RPCs / Privy API
 
 providers/ never imports from modules/
 modules/   never imports from routes/
@@ -227,10 +212,9 @@ routes/    and mcp/tools/ never import from each other
 
 ```bash
 # api/.env
-XLAYER_RPC_URL=https://rpc.xlayer.tech
-OKX_API_KEY=...
-OKX_SECRET_KEY=...
-OKX_PASSPHRASE=...
+BASE_RPC_URL=https://mainnet.base.org
+PRIVY_APP_ID=...
+PRIVY_APP_SECRET=...
 SPEND_POLICY_ADDRESS=0x...
 DATABASE_URL=postgresql://...
 SUPABASE_URL=...
@@ -240,10 +224,11 @@ ZENITHPAY_API_KEY_SECRET=...   # used to validate inbound Bearer tokens
 # web/.env.local
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_API_URL=http://localhost:3001
+NEXT_PUBLIC_PRIVY_APP_ID=...
 
 # contracts/.env
 DEPLOYER_PRIVATE_KEY=0x...        # EOA used to deploy SpendPolicy.sol
-XLAYER_RPC_URL=https://rpc.xlayer.tech
+BASE_RPC_URL=https://mainnet.base.org
 ```
 
 ---
@@ -252,11 +237,11 @@ XLAYER_RPC_URL=https://rpc.xlayer.tech
 
 | Tool                        | What it does                                                                   |
 | --------------------------- | ------------------------------------------------------------------------------ |
-| `zenithpay_balance`         | USDC + OKB balance + remaining daily budget                                    |
-| `zenithpay_pay_service`     | Policy-gated x402 payment with auto-swap                                       |
+| `zenithpay_balance`         | USDC + ETH balance + remaining daily budget                                    |
+| `zenithpay_pay_service`     | Policy-gated x402 payment on Base                                              |
 | `zenithpay_get_limits`      | Read current spend policy (read-only)                                          |
 | `zenithpay_set_limits`      | Set perTxLimit, dailyBudget, allowlist, approvalThreshold (human EOA required) |
-| `zenithpay_verify_merchant` | OKX security scan + allowlist check before paying                              |
+| `zenithpay_verify_merchant` | Allowlist check before paying                                                  |
 | `zenithpay_ledger`          | On-chain + internal transaction audit trail                                    |
 
 MCP server: `app.all('/mcp')` inline in `app.ts` — mounts `StreamableHTTPTransport`.
@@ -265,49 +250,17 @@ Each tool in `mcp/tools/` calls `modules/` directly — no HTTP round-trip.
 
 ---
 
-## OKX OnchainOS — First-Class Tools
+## Base + Privy — Integration Layer
 
-**Hard rule:** NEVER use Locus, Privy, Base chain, Coinbase SDK, or any non-OKX payment/wallet provider.
+All provider calls go through `providers/privy/`. Never call Privy or Base RPCs directly from modules or routes.
 
-All OKX API calls go through `providers/onchainos/`. Never call OKX directly from modules or routes.
+### Provider files (`api/src/providers/privy/`)
 
-### MCP tools live map (`mcp__onchainos-cli__*`)
-
-| Task                         | MCP Tool                              | Used in ZenithPay              |
-| ---------------------------- | ------------------------------------- | ------------------------------ |
-| Check agent USDC/OKB balance | `portfolio_token_balances`            | Pre-payment balance check      |
-| Get total portfolio value    | `portfolio_total_value`               | Dashboard balance display      |
-| Get all token balances       | `portfolio_all_balances`              | Dashboard token list           |
-| Get OKB→USDC swap quote      | `swap_quote`                          | Pre-payment auto-swap estimate |
-| Execute OKB→USDC swap        | `swap_swap`                           | Auto-swap before payment       |
-| Approve token for swap       | `swap_approve`                        | ERC-20 approval before swap    |
-| Check swap liquidity         | `swap_liquidity`                      | Verify route exists            |
-| Estimate gas                 | `gateway_gas` + `gateway_gas_limit`   | Pre-flight gas check           |
-| Simulate tx before broadcast | `gateway_simulate`                    | Verify tx won't revert         |
-| Broadcast signed tx          | `gateway_broadcast`                   | Send payment tx on-chain       |
-| Track tx / order status      | `gateway_orders`                      | Confirm PaymentExecuted        |
-| Get USDC price               | `market_price`                        | Dashboard price display        |
-| Search token                 | `token_search`                        | Allowlist validation           |
-| Token safety info            | `token_info` + `token_advanced_info`  | Token risk check               |
-| Trending tokens              | `token_trending` + `token_hot_tokens` | Dashboard enrichment           |
-| Agent wallet login           | `wallet_login` + `wallet_verify`      | TEE wallet creation            |
-| Create sub-wallet            | `wallet_create`                       | Multi-agent support            |
-| Agent wallet tx history      | `wallet_history`                      | Ledger — agent's own txs       |
-| Scan tx for risk             | `security_tx_scan`                    | Pre-payment security gate      |
-| Scan merchant URL            | `security_dapp_scan`                  | Allowlist validation           |
-
-### Provider → skill map (read skill before writing provider file)
-
-| Provider file                           | Skill to read first    |
-| --------------------------------------- | ---------------------- |
-| `providers/onchainos/agentic-wallet.ts` | `okx-agentic-wallet`   |
-| `providers/onchainos/balance.ts`        | `okx-wallet-portfolio` |
-| `providers/onchainos/gateway.ts`        | `okx-onchain-gateway`  |
-| `providers/onchainos/swap.ts`           | `okx-dex-swap`         |
-| `providers/onchainos/market.ts`         | `okx-dex-market`       |
-| `providers/onchainos/token.ts`          | `okx-dex-token`        |
-| `providers/onchainos/payments.ts`       | `okx-onchain-gateway`  |
-| Security scan (any)                     | `okx-security`         |
+| File           | Responsibility                                     |
+| -------------- | -------------------------------------------------- |
+| `wallet.ts`    | Privy server wallet — create, sign, manage wallets |
+| `balance.ts`   | Read USDC/ETH balances via viem on Base             |
+| `payments.ts`  | x402 payment execution with Privy signer            |
 
 ---
 
@@ -326,11 +279,8 @@ All OKX API calls go through `providers/onchainos/`. Never call OKX directly fro
 
 | Trigger                            | Skill / MCP                              |
 | ---------------------------------- | ---------------------------------------- |
-| Any OKX balance/portfolio provider | `okx-wallet-portfolio`                   |
-| Any OKX gateway/broadcast provider | `okx-onchain-gateway`                    |
-| Any OKX swap provider              | `okx-dex-swap`                           |
-| Any OKX market/price provider      | `okx-dex-market`                         |
-| Any OKX token provider             | `okx-dex-token`                          |
+| Privy wallet provider              | Privy docs — server wallet SDK           |
+| Balance check via viem             | viem docs — `readContract`               |
 | x402 endpoint discovery            | `mcp__agentcash__discover_api_endpoints` |
 | x402 payment call                  | `mcp__agentcash__fetch`                  |
 
@@ -362,7 +312,7 @@ All OKX API calls go through `providers/onchainos/`. Never call OKX directly fro
 | `web/`       | Vercel          | `usezenithpay.xyz`                             |
 | `api/`       | Railway         | `api.usezenithpay.xyz`                         |
 | `docs/`      | Vercel          | `docs.usezenithpay.xyz` (post-deadline)        |
-| `contracts/` | X Layer mainnet | Already deployed — keep `broadcast/` committed |
+| `contracts/` | Base mainnet    | Already deployed — keep `broadcast/` committed |
 
 `api.usezenithpay.xyz/mcp` — MCP server (same Railway process)
 `api.usezenithpay.xyz/skill.md` — Agent skill file (same Railway process)
@@ -393,16 +343,15 @@ Commit after every meaningful unit. Deploy commits must include contract address
 2. Every session ends with a commit
 3. No mocks, no workarounds, no shortest path, no AI slop — real execution only
 4. Do not re-litigate decisions already in `.context/PRD.md` — read and build
-5. Build on the OnchainOS **X Layer ecosystem**
-6. Build X Layer integrations strictly using `@resources/onchainos-skills`
-7. Bonus for integrating **x402 payments**
-8. Complete **at least one** X Layer transaction and capture the tx hash
+5. Build on **Base mainnet** (chainId: 8453)
+6. x402 payments on Base with Privy-managed agent wallets
+7. Complete **at least one** Base transaction and capture the tx hash
 9. Open-source on a public GitHub repository
 10. `approvalThreshold` is off-chain only — do not add it to SpendPolicy.sol
 
 ## Working Style
 
-- Direct and concise — think like a staff engineer
+- Direct and concise — think like a staff engineer and business owner
 - Surface risks and tradeoffs early
 - When blocked, say so immediately with what you need
-- You are a co-builder — own design decisions, not just code generation
+- You are a co-worker and c0-builder — own design decisions, ideas, not just tasks and code generation

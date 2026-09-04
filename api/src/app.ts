@@ -58,7 +58,7 @@ app.get("/health", (c) =>
 
 app.get("/skill.md", async (c) => {
   const res = await fetch(
-    "https://raw.githubusercontent.com/zenith-hq/zenithpay-xlayer/main/skills/spend-agent/SKILL.md",
+    "https://raw.githubusercontent.com/zenith-hq/zenithpay-buildx/main/skills/spend-agent/SKILL.md",
   );
   const content = await res.text();
   return c.text(content, 200, {
@@ -68,7 +68,7 @@ app.get("/skill.md", async (c) => {
 
 app.get("/references/api_docs.md", async (c) => {
   const res = await fetch(
-    "https://raw.githubusercontent.com/zenith-hq/zenithpay-xlayer/main/skills/spend-agent/references/api_docs.md",
+    "https://raw.githubusercontent.com/zenith-hq/zenithpay-buildx/main/skills/spend-agent/references/api_docs.md",
   );
   const content = await res.text();
   return c.text(content, 200, {

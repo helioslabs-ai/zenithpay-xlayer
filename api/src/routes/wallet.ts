@@ -45,8 +45,8 @@ function toBalanceResponse(
 ) {
   return {
     agentAddress: b.address,
-    usdcBalance: b.balances.USDG,
-    okbBalance: b.balances.OKB,
+    usdcBalance: b.balances.USDC,
+    ethBalance: b.balances.ETH,
     remainingDailyBudget: b.remainingDailyBudget ?? null,
   };
 }

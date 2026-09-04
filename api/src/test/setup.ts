@@ -1,10 +1,7 @@
 process.env.NODE_ENV = "test";
 process.env.PORT = "3001";
-process.env.XLAYER_RPC_URL = "https://rpc.xlayer.tech";
-process.env.OKX_API_KEY = "test_key";
-process.env.OKX_SECRET_KEY = "test_secret";
-process.env.OKX_PASSPHRASE = "test_pass";
-process.env.SPEND_POLICY_ADDRESS = "0xF5875F25ccEB2edDc57F218eaF1F71c5CF161f21";
+process.env.BASE_RPC_URL = "https://mainnet.base.org";
+process.env.SPEND_POLICY_ADDRESS = "0xbc62b94c3d427ac8538cd158cecb8e59556c48f0";
 process.env.DATABASE_URL = "postgresql://localhost:5432/zenithpay_test";
 process.env.DIRECT_URL = "postgresql://localhost:5432/zenithpay_test";
 process.env.SUPABASE_URL = "https://test.supabase.co";

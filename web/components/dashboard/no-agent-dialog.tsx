@@ -2,7 +2,7 @@
 
 import { Check, Copy } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useConnection } from "wagmi";
+import { useAccount } from "wagmi";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AGENT_QUICK_INSTALL } from "@/lib/agent-quick-install";
 
@@ -13,7 +13,7 @@ export function NoAgentDialog({
   hasAgent: boolean;
   loading: boolean;
 }) {
-  const { isConnected } = useConnection();
+  const { isConnected } = useAccount();
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 

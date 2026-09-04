@@ -1,56 +1,21 @@
 "use client";
 
+import { usePrivy } from "@privy-io/react-auth";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { toast } from "sonner";
-import { useChainId, useConnect, useConnection, useConnectors, useSwitchChain } from "wagmi";
 import { LogoMark } from "@/components/logo-mark";
-import { getOkxConnector, hasOkxWallet, XLAYER_CHAIN_ID } from "@/lib/okx-wallet";
 import ModeToggle from "./theme-toggle/mode-toggle";
 import { Button } from "./ui/button";
 
-export default function SignIn({
-  onProviderClick,
-}: {
-  onProviderClick?: () => void;
-} = {}) {
-  const { isConnected } = useConnection();
-  const { connectAsync, isPending } = useConnect();
-  const { switchChainAsync } = useSwitchChain();
-  const chainId = useChainId();
-  const connectors = useConnectors();
+export default function SignIn() {
+  const { ready, authenticated, login } = usePrivy();
   const router = useRouter();
 
   useEffect(() => {
-    if (isConnected) {
+    if (ready && authenticated) {
       router.push("/dashboard");
     }
-  }, [isConnected, router]);
-
-  async function handleSignIn() {
-    onProviderClick?.();
-    if (!hasOkxWallet()) {
-      toast.error("OKX Wallet extension not detected", {
-        description: "Install OKX Wallet to connect to ZenithPay.",
-      });
-      return;
-    }
-
-    const okxConnector = getOkxConnector(connectors);
-    if (!okxConnector) {
-      toast.error("OKX Wallet connector unavailable");
-      return;
-    }
-
-    try {
-      await connectAsync({ connector: okxConnector });
-      if (chainId !== XLAYER_CHAIN_ID) {
-        await switchChainAsync({ chainId: XLAYER_CHAIN_ID });
-      }
-    } catch {
-      toast.error("Wallet connection was cancelled or failed");
-    }
-  }
+  }, [ready, authenticated, router]);
 
   return (
     <div className="h-full w-full">
@@ -78,11 +43,11 @@ export default function SignIn({
                 <Button
                   variant="outline"
                   className="w-full cursor-pointer h-10 text-md rounded-none relative overflow-hidden border-dashed"
-                  onClick={handleSignIn}
-                  disabled={isPending}
+                  onClick={login}
+                  disabled={!ready}
                 >
                   <span className="shine absolute -top-1/2 -left-full h-[200%] w-3/4 skew-x-[-20deg] bg-linear-to-r from-transparent via-white/50 to-transparent pointer-events-none" />
-                  Connect Wallet
+                  Sign In
                 </Button>
                 <span className="absolute h-2 w-2 border-foreground border-b border-r bottom-0 right-0" />
                 <span className="absolute h-2 w-2 border-foreground border-b border-l bottom-0 left-0" />
@@ -90,7 +55,7 @@ export default function SignIn({
                 <span className="absolute h-2 w-2 border-foreground border-t border-l top-0 left-0" />
               </div>
               <p className="text-xs text-muted-foreground">
-                Supports OKX Wallet extension
+                Sign in with email via Privy. A wallet is created automatically.
               </p>
             </div>
           </div>

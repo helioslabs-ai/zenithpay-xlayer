@@ -3,7 +3,7 @@ title: Introduction
 description: Welcome
 ---
 
-ZenithPay is a spend governance layer for AI agents on X Layer.
+ZenithPay is a spend governance layer for AI agents on Base.
 
 ![ZenithPay banner](/banner.png)
 
@@ -24,10 +24,9 @@ ZenithPay is a spend governance layer for AI agents on X Layer.
 
 It combines:
 
-- OKX Agentic Wallet (TEE key custody)
-- SpendPolicy.sol on X Layer (hard policy gate)
-- x402 verify/settle via OKX Payments API
-- auto-swap OKB -> USDG when required
+- Privy-managed agent wallets (secure key custody)
+- SpendPolicy.sol on Base (hard policy gate)
+- x402 payment protocol on Base
 - ledger + approvals for full auditability
 
 ## Why ZenithPay exists
@@ -43,11 +42,11 @@ ZenithPay gives all three with onchain policy enforcement first, then payment ex
 ## System components
 
 1. **Agent Wallet**
-    - OKX Agentic Wallet (TEE), no raw private key handling in app code.
+    - Privy-managed wallet, no raw private key handling in app code.
 2. **Policy Engine**
-    - SpendPolicy.sol enforces per-tx and daily constraints on X Layer.
+    - SpendPolicy.sol enforces per-tx and daily constraints on Base.
 3. **Payment Engine**
-    - `POST /pay` orchestrates check -> optional swap -> x402 settlement.
+    - `POST /pay` orchestrates check -> x402 settlement.
 4. **Seller Route**
     - `/sell/agent-intel` implements x402 seller flow (`402` challenge, verify, settle, paid response).
 5. **Control Plane**
@@ -57,15 +56,15 @@ ZenithPay gives all three with onchain policy enforcement first, then payment ex
 
 1. Agent submits `POST /pay` with `serviceUrl`, `maxAmount`, and `intent`.
 2. ZenithPay checks SpendPolicy first.
-3. If needed, ZenithPay swaps OKB -> USDG.
-4. ZenithPay executes x402 verify/settle.
-5. ZenithPay writes ledger and returns `approved`, `pending`, or `blocked`.
+3. ZenithPay executes x402 verify/settle on Base.
+4. ZenithPay writes ledger and returns `approved`, `pending`, or `blocked`.
 
 ## Current production references
 
 - API: `https://api.usezenithpay.xyz`
 - Seller route: `https://api.usezenithpay.xyz/sell/agent-intel`
-- SpendPolicy: `0x1250e52B7154E12F66e8E347ce116F463D4E248B`
+- Chain: Base mainnet (8453)
+- USDC: `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`
 
 ## Minimal pay example
 

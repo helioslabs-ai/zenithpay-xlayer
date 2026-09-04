@@ -7,7 +7,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { useConnection } from "wagmi";
+import { useAccount } from "wagmi";
 import { getAgentsByOwner } from "@/lib/api";
 
 function deriveDisplayName(label: string | null, address: string): string {
@@ -38,7 +38,7 @@ const DEMO_AGENT_ADDRESS = "0x726cf0c4fe559db9a32396161694c7b88c60c947";
 const DEMO_AGENT_LABEL = "intel-agent";
 
 export function AgentProvider({ children, isDemo }: { children: ReactNode; isDemo?: boolean }) {
-  const { address, isConnected } = useConnection();
+  const { address, isConnected } = useAccount();
   const [agentAddress, setAgentAddress] = useState("");
   const [agentLabel, setAgentLabel] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);

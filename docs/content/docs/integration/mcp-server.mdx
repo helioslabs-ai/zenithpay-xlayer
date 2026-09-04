@@ -113,21 +113,21 @@ agent = Agent(
 
 | Tool | Description |
 | --- | --- |
-| `zenithpay_balance` | USDG + OKB balances + remaining daily budget |
+| `zenithpay_balance` | USDC + ETH balances + remaining daily budget |
 | `zenithpay_get_limits` | Read current onchain spend policy |
-| `zenithpay_verify_merchant` | OKX security scan + allowlist check |
-| `zenithpay_pay_service` | Policy-gated x402 payment with auto-swap |
+| `zenithpay_verify_merchant` | Security scan + allowlist check |
+| `zenithpay_pay_service` | Policy-gated x402 payment |
 | `zenithpay_set_limits` | Deploy/update SpendPolicy.sol (human EOA required) |
 | `zenithpay_ledger` | Full transaction audit trail |
 
 ## Required call order every session
 
 ```
-1. zenithpay_get_limits()       → understand policy before any spend
-2. zenithpay_balance()          → confirm funds available
-3. zenithpay_verify_merchant()  → safety check the merchant
-4. zenithpay_pay_service()      → execute payment
-5. zenithpay_ledger()           → review audit trail at end
+1. zenithpay_get_limits()       -> understand policy before any spend
+2. zenithpay_balance()          -> confirm funds available
+3. zenithpay_verify_merchant()  -> safety check the merchant
+4. zenithpay_pay_service()      -> execute payment
+5. zenithpay_ledger()           -> review audit trail at end
 ```
 
 ## Notes for production

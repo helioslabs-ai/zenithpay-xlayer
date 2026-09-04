@@ -4,7 +4,7 @@ import { mcpServer } from "../server";
 
 mcpServer.tool(
   "zenithpay_balance",
-  "Get agent USDG and OKB balance plus remaining daily budget on X Layer",
+  "Get agent USDC and ETH balance plus remaining daily budget on Base",
   { agentAddress: z.string().optional() },
   async ({ agentAddress }) => {
     const address = agentAddress ?? process.env.AGENT_ADDRESS ?? "";

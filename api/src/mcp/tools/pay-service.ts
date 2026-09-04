@@ -4,7 +4,7 @@ import { mcpServer } from "../server";
 
 mcpServer.tool(
   "zenithpay_pay_service",
-  "Execute a policy-gated x402 payment with auto-swap. SpendPolicy.sol is checked on-chain before spending. Returns: { status, txHash, amount, currency (USDG), merchant, network, asset, chainId }",
+  "Execute a policy-gated x402 payment on Base. SpendPolicy.sol is checked on-chain before spending. Returns: { status, txHash, amount, currency (USDC), merchant, network, asset, chainId }",
   {
     serviceUrl: z.string().url(),
     maxAmount: z.string(),

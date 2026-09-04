@@ -13,7 +13,7 @@ function DocsBrandTitle() {
 // fill this with your actual GitHub info, for example:
 export const gitConfig = {
   user: 'zenith-hq',
-  repo: 'zenithpay-xlayer',
+  repo: 'zenithpay-buildx',
   branch: 'main',
 };
 

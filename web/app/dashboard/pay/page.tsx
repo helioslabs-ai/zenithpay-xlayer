@@ -23,7 +23,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { executePayment, type PaymentResult } from "@/lib/api";
 
-const EXPLORER_URL = "https://www.oklink.com/xlayer";
+const EXPLORER_URL = "https://basescan.org";
 
 function StatusDisplay({ result }: { result: PaymentResult }) {
   const statusClass =
@@ -96,7 +96,7 @@ function StatusDisplay({ result }: { result: PaymentResult }) {
             Auto-swap
           </span>
           <span className="font-mono text-xs border border-dashed px-2 py-0.5">
-            {result.okbSpent} OKB used
+            {result.okbSpent} ETH used
           </span>
         </div>
       )}
@@ -223,7 +223,7 @@ export default function PayPage() {
                   htmlFor="maxAmount"
                   className="text-xs uppercase tracking-wider"
                 >
-                  Max Amount (USDG)
+                  Max Amount (USDC)
                 </Label>
                 <Input
                   id="maxAmount"

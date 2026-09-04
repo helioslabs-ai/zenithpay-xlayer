@@ -24,10 +24,10 @@ Public endpoints:
 | Method | Route | Purpose |
 | --- | --- | --- |
 | `GET` | `/health` | Health check |
-| `POST` | `/wallet/genesis` | Create a TEE-secured agent wallet |
+| `POST` | `/wallet/genesis` | Create a Privy-managed agent wallet |
 | `GET` | `/wallet/balance` | Wallet balances + remaining daily budget |
 | `GET` | `/wallet/agents` | List agent addresses under your account |
-| `POST` | `/pay` | Policy-gated x402 payment (swap OKB->USDG if needed) |
+| `POST` | `/pay` | Policy-gated x402 payment on Base |
 | `GET` | `/limits` | Read current spend policy |
 | `POST` | `/limits` | Deploy/update `SpendPolicy.sol` (requires human signature) |
 | `GET` | `/approvals` | Payments paused for human review |
@@ -56,7 +56,7 @@ curl -X POST https://api.usezenithpay.xyz/pay \
     "agentAddress": "0xcadf...1a9",
     "serviceUrl": "https://exa.ai/search",
     "maxAmount": "0.25",
-    "intent": "Research DeFi trends on X Layer"
+    "intent": "Research DeFi trends on Base"
   }'
 ```
 

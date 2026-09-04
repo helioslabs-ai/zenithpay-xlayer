@@ -2,9 +2,12 @@ import { parseUnits } from "viem";
 
 export const SPEND_POLICY_ADDRESS = (process.env
   .NEXT_PUBLIC_SPEND_POLICY_ADDRESS ??
-  "0xF5875F25ccEB2edDc57F218eaF1F71c5CF161f21") as `0x${string}`;
+  "0xbc62b94c3d427ac8538cd158cecb8e59556c48f0") as `0x${string}`;
 
-export const XLAYER_EXPLORER = "https://www.oklink.com/xlayer";
+export const BASE_EXPLORER = "https://basescan.org";
+
+export const BASE_USDC_ADDRESS =
+  "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913" as `0x${string}`;
 
 export function usdcToUnits(amount: string): bigint {
   return parseUnits(amount, 6);

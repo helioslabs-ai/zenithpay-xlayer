@@ -17,14 +17,14 @@ const FAQS = [
       "The payment is blocked before it executes. The call never reaches the service. Every blocked attempt is logged on-chain so you have a full audit trail of what was tried and why it was rejected.",
   },
   {
-    question: "Does my agent need to hold USDG?",
+    question: "Does my agent need to hold USDC?",
     answer:
-      "Yes — x402 payments settle in USDG on X Layer. If your agent holds another token, ZenithPay can auto-swap via OKX DEX before the payment goes out. No manual top-ups needed.",
+      "Yes — x402 payments settle in USDC on Base. If your agent holds another token, ZenithPay can auto-swap via a DEX aggregator before the payment goes out. No manual top-ups needed.",
   },
   {
     question: "What networks are supported?",
     answer:
-      "X Layer mainnet. Agent wallets, spend policies, and all payment settlement run on X Layer. The x402 protocol routes payments to any compatible service endpoint.",
+      "Base mainnet. Agent wallets, spend policies, and all payment settlement run on Base. The x402 protocol routes payments to any compatible service endpoint.",
   },
   {
     question: "Can I update the policy after setting it?",

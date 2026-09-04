@@ -6,24 +6,16 @@ const envSchema = z.object({
     .enum(["development", "production", "test"])
     .default("development"),
 
-  // Base mainnet is the default execution network. X Layer remains optional
-  // for the legacy adapter during migration.
+  // Base mainnet RPC
   BASE_RPC_URL: z.string().url().default("https://mainnet.base.org"),
+
+  // x402 facilitator (optional — the @x402/fetch SDK can discover one)
   X402_FACILITATOR_URL: z.string().url().optional(),
 
   // Privy server wallet integration
   PRIVY_APP_ID: z.string().min(1).optional(),
   PRIVY_APP_SECRET: z.string().min(1).optional(),
   PRIVY_AUTHORIZATION_PRIVATE_KEY: z.string().min(1).optional(),
-
-  // Legacy X Layer RPC
-  XLAYER_RPC_URL: z.string().url().default("https://rpc.xlayer.tech"),
-
-  // OKX OnchainOS
-  OKX_API_KEY: z.string().min(1).optional(),
-  OKX_SECRET_KEY: z.string().min(1).optional(),
-  OKX_PASSPHRASE: z.string().min(1).optional(),
-  OKX_PROJECT_ID: z.string().optional(),
 
   // Contract — must be set to deployed address
   SPEND_POLICY_ADDRESS: z
@@ -47,7 +39,7 @@ function loadEnv() {
   const result = envSchema.safeParse(process.env);
   if (!result.success) {
     console.error(
-      "❌ Invalid environment variables:",
+      "Invalid environment variables:",
       result.error.flatten().fieldErrors,
     );
     process.exit(1);

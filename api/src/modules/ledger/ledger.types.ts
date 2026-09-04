@@ -11,6 +11,7 @@ export interface LedgerEntry {
   reason?: string | null;
   txHash?: string | null;
   swapUsed: boolean;
+  /** @deprecated Legacy field — always null for Base payments */
   okbSpent?: string | null;
   createdAt: string;
   network?: string | null;

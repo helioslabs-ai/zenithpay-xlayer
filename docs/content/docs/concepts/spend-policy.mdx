@@ -3,13 +3,13 @@ title: Spend Policy
 description: On-chain spend limits for agents
 ---
 
-SpendPolicy.sol is an on-chain spend control contract deployed per agent on X Layer.
+SpendPolicy.sol is an on-chain spend control contract deployed per agent on Base.
 
-ZenithPay uses it as the authoritative gate: policy is always checked before swap or settlement.
+ZenithPay uses it as the authoritative gate: policy is always checked before settlement.
 
 ## SpendPolicy.sol: on-chain enforcement
 
-ZenithPay's spend control is enforced by `SpendPolicy.sol` on X Layer.
+ZenithPay's spend control is enforced by `SpendPolicy.sol` on Base.
 
 ### Policy fields (v1)
 | Field | Meaning | Enforcement |
@@ -30,5 +30,5 @@ ZenithPay's spend control is enforced by `SpendPolicy.sol` on X Layer.
 
 ### Current deployment
 
-- Network: X Layer (`chainId: 196`)
-- Contract: `0x1250e52B7154E12F66e8E347ce116F463D4E248B`
+- Network: Base (`chainId: 8453`)
+- USDC: `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`

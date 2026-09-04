@@ -34,7 +34,7 @@ export interface AgentPolicy {
 export interface BalanceResult {
   agentAddress: string;
   usdcBalance: string;
-  okbBalance: string;
+  ethBalance: string;
   remainingDailyBudget: string | null;
 }
 

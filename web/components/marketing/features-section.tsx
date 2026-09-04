@@ -359,10 +359,10 @@ function MicroHeroTwo({ className }: { className?: string }) {
 function MicroHeroThree({ className }: { className?: string }) {
 	const [hovered, setHovered] = useState(false)
 	const swapRows = [
-		{ id: "okb-usdg-okx", from: "OKB", to: "USDG", route: "OKX DEX" },
-		{ id: "usdg-usdg-direct", from: "USDG", to: "USDG", route: "DIRECT" },
-		{ id: "usdt-usdg-okx", from: "USDT", to: "USDG", route: "OKX DEX" },
-		{ id: "any-usdg-auto", from: "ANY", to: "USDG", route: "AUTO-SWAP" },
+		{ id: "eth-usdc-dex", from: "ETH", to: "USDC", route: "DEX" },
+		{ id: "usdc-usdc-direct", from: "USDC", to: "USDC", route: "DIRECT" },
+		{ id: "usdt-usdc-dex", from: "USDT", to: "USDC", route: "DEX" },
+		{ id: "any-usdc-auto", from: "ANY", to: "USDC", route: "AUTO-SWAP" },
 	]
 
 	return (
@@ -384,7 +384,7 @@ function MicroHeroThree({ className }: { className?: string }) {
 					Auto-Swap
 				</span>
 				<h2 className="text-[20px] font-bold tracking-tight text-foreground leading-tight mt-1.5">
-					Any Token in, USDG Out.
+					Any Token in, USDC Out.
 				</h2>
 			</div>
 
@@ -565,8 +565,8 @@ export function FeaturesSection() {
 						Built for agents that spend.
 					</h2>
 					<p className="mt-3 text-[16px] text-muted-foreground max-w-xl">
-						Hard limits, zero-gas payments, automatic token swaps, and a full audit
-						trail — everything an agent needs to pay safely and autonomously.
+					Hard limits, x402 payments, automatic token swaps, and a full audit
+					trail — everything an agent needs to pay safely and autonomously.
 					</p>
 				</div>
 

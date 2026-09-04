@@ -9,11 +9,11 @@ Global operating guide for any coding agent working in this repo (Cursor, Codex,
 
 ## Project
 
-**ZenithPay** — spend management layer for AI agents on X Layer.
+**ZenithPay** — spend management layer for AI agents on Base.
 
-> Agents securely pay x402-native HTTP endpoints with enforced on-chain spend policies, zero-gas USDC transfers, and auto-swap, full audit via OKX OnchainOS DEX.
+> Agents securely pay x402-native HTTP endpoints with enforced on-chain spend policies, Privy-managed agent wallets, and full audit trail on Base mainnet.
 
-**Hackathon:** X Layer OnchainOS AI Hackathon — Agentic Payments track
+**Origin:** Originally built for a hackathon, now a portfolio piece demonstrating onchain agent payments.
 **Deadline:** March 26, 2026
 
 ---
@@ -24,10 +24,9 @@ Global operating guide for any coding agent working in this repo (Cursor, Codex,
 | ------------------------------------ | ------------------------------------------------------------------- |
 | `.context/PRD.md`                    | Architecture decisions + full product spec. Source of truth.        |
 | `.context/MEMORY.md`                 | Current build state: done / next / blockers. Updated every session. |
-| `.context/OnchainOS-AI-hackathon.md` | Official hackathon requirements and judging criteria.               |
 | `web/`                               | Frontend — Next.js 16 + Tailwind v4 + shadcn/ui                     |
-| `api/`                               | Backend API — Bun + Hono _(not scaffolded yet)_                     |
-| `contracts/`                         | Smart contracts — Solidity + Foundry _(not scaffolded yet)_         |
+| `api/`                               | Backend API — Bun + Hono                                            |
+| `contracts/`                         | Smart contracts — Solidity + Foundry                                |
 
 ---
 
@@ -47,7 +46,7 @@ bun check            # biome check --write
 forge build
 forge test
 forge test --match-test <TestName>
-forge script script/Deploy.s.sol --rpc-url $XLAYER_RPC_URL --broadcast --slow
+forge script script/Deploy.s.sol --rpc-url $BASE_RPC_URL --broadcast --slow
 
 # API (Bun + Hono) — cd api/
 bun dev              # dev server :3001
@@ -72,13 +71,12 @@ bun test             # run tests
 
 ```
 Agent → zenithpay_pay_service(url, maxAmount, intent)
-  → Check USDC balance            (okx-wallet-portfolio)
+  → Check USDC balance            (viem readContract on Base)
   → [If USDC < required]
-      auto-swap OKB → USDC        (okx-dex-swap)
+      return error — insufficient balance
   → SpendPolicy.sol checkAndRecord()  ← on-chain enforcement gate
-  → OKX TEE agentic wallet signs EIP-3009 transferWithAuthorization
-  → POST /api/v6/x402/verify      ← OKX Payments API (verify payment)
-  → POST /api/v6/x402/settle      ← OKX Payments API (zero-gas settle)
+  → Privy server wallet signs x402 payment
+  → x402 payment sent to service endpoint on Base
   → txHash returned
   → PaymentExecuted event emitted on-chain
   → Ledger entry written to Supabase
@@ -86,55 +84,40 @@ Agent → zenithpay_pay_service(url, maxAmount, intent)
 
 Blocked call path: `SpendPolicy.sol` reverts → `PaymentBlocked` event → error returned to agent.
 
-**OKX x402 Payments API** (zero-gas on X Layer):
+**x402 Payments on Base:**
 
-- `GET /api/v6/x402/supported` — check supported tokens (USDC, USDT, USDG on X Layer)
-- `POST /api/v6/x402/verify` — verify EIP-3009 authorization before settlement
-- `POST /api/v6/x402/settle` — execute settlement (zero gas, OKX acts as facilitator)
+- Agent's Privy server wallet signs EIP-3009 `transferWithAuthorization` for USDC on Base
+- `@x402/fetch` handles the 402 challenge-response flow automatically
+- Settlement happens on Base mainnet — standard gas, no facilitator needed
 
-Agent signs an EIP-3009 `transferWithAuthorization` with a deadline, passes it to `/verify`, then `/settle` executes the USDC transfer on-chain. Full spec in `.context/PRD.md` §4.
+Full spec in `.context/PRD.md` §4.
 
 ### API provider layer (`api/src/providers/`)
 
 | File                            | Responsibility                                          |
 | ------------------------------- | ------------------------------------------------------- |
-| `onchainos/agentic-wallet.ts`   | OKX TEE agentic wallet — ak/verify, session, sign + broadcast |
-| `onchainos/balance.ts`          | OKX Wallet Check Balance API                            |
-| `onchainos/gateway.ts`          | OKX Transaction API — simulate + broadcast              |
-| `onchainos/swap.ts`             | OKX DEX Swap API — OKB→USDC pre-payment                 |
-| `onchainos/payments.ts`         | OKX Payments API — x402 zero-gas execution              |
-| `onchainos/history.ts`          | OKX Transaction History API                             |
-| `onchainos/market.ts`           | OKX Market API — prices + token data                    |
+| `privy/wallet.ts`               | Privy server wallet — create, sign, manage agent wallets |
+| `privy/balance.ts`              | Read USDC/ETH balances via viem on Base                  |
+| `privy/payments.ts`             | x402 payment execution with Privy signer                 |
 
-### X Layer chain config
+### Base chain config
 
 ```typescript
 // api/src/config/chains.ts
-export const xlayer = defineChain({
-	id: 196,
-	name: "X Layer",
-	nativeCurrency: { name: "OKB", symbol: "OKB", decimals: 18 },
-	rpcUrls: {
-		default: { http: ["https://rpc.xlayer.tech"] },
-		fallback: { http: ["https://xlayerrpc.okx.com"] },
-	},
-	blockExplorers: {
-		default: { name: "OKLink", url: "https://www.oklink.com/xlayer" },
-	},
-})
+import { base } from "viem/chains"
 
-export const XLAYER_USDC = "0x74b7f16337b8972027f6196a17a631ac6de26d22"
-// OKB native: 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+// Base mainnet (chainId: 8453) — used directly from viem/chains
+export const BASE_USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+// ETH native: 0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 ```
 
 ### Required env vars
 
 ```bash
 # api/
-XLAYER_RPC_URL=https://rpc.xlayer.tech
-OKX_API_KEY=...
-OKX_SECRET_KEY=...
-OKX_PASSPHRASE=...
+BASE_RPC_URL=https://mainnet.base.org
+PRIVY_APP_ID=...
+PRIVY_APP_SECRET=...
 SPEND_POLICY_ADDRESS=0x...
 SUPABASE_URL=...
 SUPABASE_SERVICE_KEY=...
@@ -142,6 +125,7 @@ SUPABASE_SERVICE_KEY=...
 # web/
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXT_PUBLIC_API_URL=http://localhost:3001
+NEXT_PUBLIC_PRIVY_APP_ID=...
 ```
 
 ---
@@ -184,11 +168,10 @@ Commit after every meaningful unit. Deploy commits must include contract address
 2. Every session ends with a commit
 3. No mocks, no workarounds — real execution only
 4. Do not re-litigate decisions already in `.context/PRD.md` — read and build
-5. Build on OnchainOS **X Layer ecosystem** (chainId: 196)
-6. X Layer integrations use OKX OnchainOS APIs only
-7. x402 payments are required — zero-gas on X Layer via OKX Payments API
-8. Complete at least one X Layer transaction and capture the tx hash
-9. Keep the GitHub repo public
+5. Build on **Base mainnet** (chainId: 8453)
+6. x402 payments on Base with Privy-managed agent wallets
+7. Complete at least one Base transaction and capture the tx hash
+8. Keep the GitHub repo public
 
 ## Solidity rules
 
@@ -208,48 +191,26 @@ Commit after every meaningful unit. Deploy commits must include contract address
 
 ---
 
-## OKX OnchainOS — Tool map
+## Base + Privy — Integration layer
 
-OnchainOS tools are the **only** approved integrations for X Layer. No Base, no Locus, no Privy.
+Privy manages agent wallets (server-side). viem reads balances and interacts with contracts on Base. `@x402/fetch` handles x402 payment flows.
 
-### MCP tools (`onchainos-cli` server)
+### Provider files (`api/src/providers/privy/`)
 
-| Task                         | Tool                                |
-| ---------------------------- | ----------------------------------- |
-| Check agent USDC/OKB balance | `portfolio_token_balances`          |
-| Get total portfolio value    | `portfolio_total_value`             |
-| Get all token balances       | `portfolio_all_balances`            |
-| Get swap quote (OKB→USDC)    | `swap_quote`                        |
-| Execute swap                 | `swap_swap`                         |
-| Approve token for swap       | `swap_approve`                      |
-| Estimate gas                 | `gateway_gas` + `gateway_gas_limit` |
-| Simulate tx                  | `gateway_simulate`                  |
-| Broadcast signed tx          | `gateway_broadcast`                 |
-| Track tx status              | `gateway_orders`                    |
-| Get token price              | `market_price`                      |
-| Search / validate token      | `token_search` + `token_info`       |
-| Token safety check           | `token_advanced_info`               |
-
-### Skills → provider file mapping
-
-| Provider file                     | Skill to invoke before writing                    |
-| --------------------------------- | ------------------------------------------------- |
-| `providers/onchainos/balance.ts`  | `okx-wallet-portfolio`                            |
-| `providers/onchainos/gateway.ts`  | `okx-onchain-gateway`                             |
-| `providers/onchainos/swap.ts`     | `okx-dex-swap`                                    |
-| `providers/onchainos/payments.ts` | `okx-onchain-gateway` (OKX x402 API — see PRD §4) |
-| `providers/onchainos/market.ts`   | `okx-dex-market`                                  |
-| `providers/onchainos/token.ts`    | `okx-dex-token`                                   |
-| `providers/onchainos/agentic-wallet.ts` | `okx-agentic-wallet` — TEE agentic wallet   |
-| Token risk before allowlist       | `okx-security`                                    |
+| File           | Responsibility                                     |
+| -------------- | -------------------------------------------------- |
+| `wallet.ts`    | Privy server wallet — create, sign, manage wallets |
+| `balance.ts`   | Read USDC/ETH balances via viem on Base             |
+| `payments.ts`  | x402 payment execution with Privy signer            |
 
 ### Hard rules — ecosystem
 
-- **Agent wallet:** OKX TEE agentic wallet (`onchainos/agentic-wallet.ts`) — API key auth, session cert, `preTransactionUnsignedInfo` + `broadcastTransaction`. No viem EOA.
-- **Frontend wallet connect:** wagmi `injected()` — OKX Wallet auto-detected via EIP-6963, no Privy
-- **Payment execution:** OKX x402 Payments API (`POST /api/v6/x402/verify` + `/settle`) — zero gas, no raw broadcast needed
-- **x402 routing:** `@x402/fetch` + `@x402/hono` client-side; settlement via OKX facilitator
-- **Swaps:** `okx-dex-swap` only — 500+ DEX sources
+- **Agent wallet:** Privy server wallet — API key auth, server-side signing. No browser wallet for agents.
+- **Frontend auth:** Privy email login — embedded wallet optional
+- **Frontend wallet connect:** wagmi + Privy on Base
+- **Payment execution:** `@x402/fetch` with Privy signer on Base — standard gas
+- **x402 routing:** `@x402/fetch` client-side; settlement on Base mainnet
+- **No auto-swap:** agents must hold sufficient USDC before payment
 
 ---
 
@@ -257,16 +218,13 @@ OnchainOS tools are the **only** approved integrations for X Layer. No Base, no 
 
 | Layer               | Technology                                                                          |
 | ------------------- | ----------------------------------------------------------------------------------- |
-| Chain               | X Layer (chainId: 196, EVM-compatible)                                              |
-| Agent wallet        | OKX TEE agentic wallet (`onchainos/agentic-wallet.ts`) + `okx-agentic-wallet` skill |
-| Balance / portfolio | `okx-wallet-portfolio` skill + `portfolio_*` MCP tools                              |
-| DEX swap            | `okx-dex-swap` skill + `swap_*` MCP tools                                           |
-| Tx broadcast        | `okx-onchain-gateway` skill + `gateway_*` MCP tools                                 |
-| Market data         | `okx-dex-market` skill + `market_*` MCP tools                                       |
-| Token data / safety | `okx-dex-token` + `okx-security` skills                                             |
-| Payment routing     | x402 (`@x402/fetch` + `@x402/hono`) + OKX Payments API (`/x402/verify` + `/settle`) |
+| Chain               | Base mainnet (chainId: 8453)                                                        |
+| Agent wallet        | Privy server wallet (API key auth, server-side signing)                              |
+| Balance / portfolio | viem `readContract` on Base (USDC + ETH)                                            |
+| Payment routing     | x402 (`@x402/fetch` + `@x402/hono`) with Privy signer on Base                       |
 | Policy enforcement  | SpendPolicy.sol (Solidity + Foundry)                                                |
 | Backend             | Hono + Bun                                                                          |
 | Database            | Supabase + Drizzle                                                                  |
 | Frontend            | Next.js 16 + Tailwind v4 + shadcn/ui                                                |
-| Frontend wallet     | wagmi `injected()` — OKX Wallet via EIP-6963 (no Privy)                             |
+| Frontend auth       | Privy email login + embedded wallet                                                  |
+| Frontend wallet     | wagmi + Privy on Base                                                                |

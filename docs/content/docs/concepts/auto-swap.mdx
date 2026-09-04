@@ -1,29 +1,23 @@
 ---
-title: Auto-Swap
-description: OKB -> USDG funding after policy gate
+title: Auto-Swap (Deprecated)
+description: Auto-swap is no longer needed on Base
 ---
 
-Auto-swap lets an agent pay USDG-settled x402 services when wallet balance is in OKB.
+> **Note:** Auto-swap has been removed in the Base migration. On the previous X Layer deployment, ZenithPay could automatically swap OKB to USDG when the agent had insufficient settlement token balance. This feature is no longer needed.
 
-The swap is strictly a funding step: ZenithPay never swaps before `SpendPolicy.sol` approves the payment.
+## Why auto-swap was removed
 
-## Auto-swap (funding mechanism)
+On Base, the settlement token is USDC — a widely held stablecoin. Agents are expected to hold USDC directly in their Privy-managed wallets. The complexity of an auto-swap layer (native token -> stablecoin) is not justified when:
 
-Auto-swap exists to help agents pay services that require USDG when the agent has insufficient USDG but enough OKB.
+- USDC is natively available and widely bridged on Base
+- Agent wallets can be funded directly with USDC
+- Removing the swap step simplifies the payment flow and reduces failure modes
 
-### Key rule: policy first, never swap first
-ZenithPay always checks `SpendPolicy.sol` for the settlement-token-denominated `maxAmount` before any swap happens.
+## Current payment flow
 
-If policy fails, the payment is rejected immediately (`status: "blocked"`). If the payment is above the human review threshold, it is paused for approval (`status: "pending"`). No swap occurs in either case.
+1. SpendPolicy check (USDC amount)
+2. USDC balance check
+3. x402 `/verify` -> `/settle` on Base
+4. Ledger entry written
 
-### When swap happens
-Swap is only attempted if USDG is insufficient to cover the requested payment amount.
-
-### Correct execution order (pay service)
-1. SpendPolicy check (settlement token amount)
-2. USDG balance check
-3. If needed: `swap_quote` -> `swap_approve` -> `swap_swap` for the exact required USDG
-4. x402 `/verify` -> `/settle`
-
-### Why exact amount matters
-ZenithPay approves only what it needs for the payment, so slippage cannot accidentally push spending above the policy-gated cap.
+If the agent has insufficient USDC, the payment is blocked with `insufficient_balance`. The operator should fund the agent wallet with USDC on Base.

@@ -9,7 +9,7 @@ via_ir = false
 remappings = ["@openzeppelin/=lib/openzeppelin-contracts/"]
 
 [rpc_endpoints]
-xlayer = "${XLAYER_RPC_URL}"
+base = "${BASE_RPC_URL}"
 
 [etherscan]
-xlayer = { key = "${OKLINK_API_KEY}", url = "https://www.oklink.com/api/v5/explorer/contract/verify-source-code-plugin/XLAYER" }
+base = { key = "${BASESCAN_API_KEY}", url = "https://api.basescan.org/api" }

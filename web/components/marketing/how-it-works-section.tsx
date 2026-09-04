@@ -10,7 +10,7 @@ const STEPS = [
 		label: "Step 1",
 		title: "Register your agent",
 		description:
-			"Register your agent and it gets a real wallet instantly — fund USDG, and it's ready to spend. No custodians, no monthly fees.",
+			"Register your agent and it gets a real wallet instantly — fund USDC, and it's ready to spend. No custodians, no monthly fees.",
 	},
 	{
 		number: "02",
@@ -24,7 +24,7 @@ const STEPS = [
 		label: "Step 3",
 		title: "Auto-swap when needed",
 		description:
-			"Holding any token but need USDG? ZenithPay swaps automatically via OKX DEX before the payment goes out — no manual steps.",
+			"Holding any token but need USDC? ZenithPay swaps automatically via a DEX aggregator before the payment goes out — no manual steps.",
 	},
 	{
 		number: "04",

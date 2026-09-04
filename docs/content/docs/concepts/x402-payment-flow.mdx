@@ -1,6 +1,6 @@
 ---
 title: x402 Payment Flow
-description: Buyer and seller lifecycle for ZenithPay x402 payments on X Layer
+description: Buyer and seller lifecycle for ZenithPay x402 payments on Base
 ---
 
 This page explains the end-to-end x402 lifecycle implemented by ZenithPay.
@@ -9,18 +9,17 @@ This page explains the end-to-end x402 lifecycle implemented by ZenithPay.
 
 - **Buyer route**: `POST /pay` (agent/operator entry point)
 - **Seller route**: `GET|POST /sell/agent-intel` (x402 challenge + paid resource)
-- **Facilitator**: OKX Payments API (`/verify`, `/settle`)
+- **Facilitator**: x402 protocol facilitator on Base
 
 ## Sequence
 
 1. Agent requests `POST /pay` with `serviceUrl`, `maxAmount`, and `intent`.
 2. ZenithPay checks spend policy first (`SpendPolicy.sol`).
-3. If required, ZenithPay performs exact-amount swap (`OKB -> USDG`).
-4. ZenithPay calls seller route and receives x402 payment requirement (`402`).
-5. ZenithPay builds payment payload and calls OKX `/verify`.
-6. ZenithPay calls OKX `/settle`.
-7. Seller route returns paid data.
-8. ZenithPay writes ledger + returns transaction result.
+3. ZenithPay calls seller route and receives x402 payment requirement (`402`).
+4. ZenithPay builds payment payload and calls x402 `/verify`.
+5. ZenithPay calls x402 `/settle`.
+6. Seller route returns paid data.
+7. ZenithPay writes ledger + returns transaction result.
 
 ## Why this model
 
@@ -32,4 +31,5 @@ This page explains the end-to-end x402 lifecycle implemented by ZenithPay.
 
 - Buyer: `https://api.usezenithpay.xyz/pay`
 - Seller: `https://api.usezenithpay.xyz/sell/agent-intel`
-- Facilitator: `https://web3.okx.com/api/v6/x402/verify` and `/settle`
+- Network: Base mainnet (chain ID 8453)
+- Settlement token: USDC (`0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`)

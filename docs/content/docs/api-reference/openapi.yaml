@@ -41,7 +41,7 @@ components:
           type: object
           additionalProperties:
             type: string
-          example: {USDC: "0.00", OKB: "0.00"}
+          example: {USDC: "0.00", ETH: "0.00"}
         createdAt:
           type: string
           format: date-time
@@ -60,7 +60,7 @@ components:
           example: "0.25"
         intent:
           type: string
-          example: Research DeFi trends on X Layer
+          example: Research DeFi trends on Base
       required: [agentAddress, serviceUrl, maxAmount, intent]
     PayApprovedResponse:
       type: object
@@ -82,11 +82,11 @@ components:
           example: exa.ai
         intent:
           type: string
-          example: Research DeFi trends on X Layer
+          example: Research DeFi trends on Base
         swapUsed:
           type: boolean
           example: false
-        okbSpent:
+        ethSpent:
           nullable: true
           type: string
           example: null
@@ -114,7 +114,7 @@ components:
           example: exa.ai
         intent:
           type: string
-          example: Research DeFi trends on X Layer
+          example: Research DeFi trends on Base
         message:
           type: string
           example: Payment exceeds approval threshold. Awaiting human review at GET /approvals.
