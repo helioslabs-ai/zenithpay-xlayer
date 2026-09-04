@@ -28,12 +28,14 @@ export function LandingFooter() {
 					</div>
 
 					<div className="flex items-center gap-6 sm:absolute sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2">
-						<Link
-							href="/docs"
+						<a
+							href="https://docs.usezenithpay.xyz"
+							target="_blank"
+							rel="noopener noreferrer"
 							className="text-xs font-medium uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
 						>
 							Docs
-						</Link>
+						</a>
 						<Link
 							href="/#"
 							className="text-xs font-medium uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
