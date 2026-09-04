@@ -297,7 +297,6 @@ export function HeroSection() {
 						className="mt-7 flex flex-wrap items-center gap-3 sm:gap-4"
 					>
 						<GetStartedButton />
-						<SeeHowItWorksButton />
 					</motion.div>
 
 					<motion.div
